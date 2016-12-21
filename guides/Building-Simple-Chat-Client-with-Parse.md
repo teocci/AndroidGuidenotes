@@ -22,7 +22,7 @@ Let's setup Parse into a brand new Android app following the steps below.
     
     ```gradle
     dependencies {
-      compile 'com.parse:parse-android:1.13.0'
+      compile 'com.parse:parse-android:1.13.1'
       compile 'com.parse:parseinterceptors:0.0.2' // for logging API calls to LogCat
     }
     ```
@@ -33,8 +33,8 @@ Let's setup Parse into a brand new Android app following the steps below.
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     ```
 
-* Create a class called `ChatApplication` which extends from `android.app.Application`
-  * In the application, initialize parse
+* Create [an application class](http://guides.codepath.com/android/Understanding-the-Android-Application-Class) called `ChatApplication` which extends from `android.app.Application`
+  * In the [Android application class](http://guides.codepath.com/android/Understanding-the-Android-Application-Class), initialize Parse as shown below:
 
     ```java
     public class ChatApplication extends Application {
@@ -65,6 +65,8 @@ Let's setup Parse into a brand new Android app following the steps below.
     />
     ```
 
+**WARNING:** Be sure to **add the application name** above after creating the custom Application class or the following code won't work!!
+
 ## 3. Design Messages Layout
 
 Let's create an XML layout which allows us to post messages by typing into a text field. Open your layout file `activity_chat.xml`, add an `EditText` and a `Button` to compose and send text messages.
@@ -74,8 +76,7 @@ Let's create an XML layout which allows us to post messages by typing into a tex
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="${relativePackage}.${activityClass}" >
+    android:layout_height="match_parent" >
 
     <EditText
         android:id="@+id/etMessage"
@@ -90,7 +91,7 @@ Let's create an XML layout which allows us to post messages by typing into a tex
         android:id="@+id/btSend"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical|right"
+        android:gravity="center"
         android:paddingRight="10dp"
         android:layout_alignParentRight="true"
         android:text="@string/send"
@@ -188,8 +189,12 @@ public class ChatActivity extends AppCompatActivity {
                 message.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                    	Toast.makeText(ChatActivity.this, "Successfully created message on Parse",
+                        if(e == null) {
+                    	    Toast.makeText(ChatActivity.this, "Successfully created message on Parse",
                              Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e(TAG, "Failed to save message", e);
+                        }
                     }
                 });
                 etMessage.setText(null);
@@ -247,7 +252,7 @@ Now that we have verified that messages are successfully being saved to your par
           android:id="@+id/btSend"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:gravity="center_vertical|right"
+          android:gravity="center"
           android:paddingRight="10dp"
           android:layout_alignParentRight="true"
           android:text="@string/send"
@@ -322,7 +327,7 @@ public class Message extends ParseObject {
     public void setBody(String body) {
         put(BODY_KEY, body);
     }
-}}
+}
 ```
 
 We also need to make sure to register this class with Parse before we call Parse.initialize within the `ChatApplication.java` file:
@@ -358,14 +363,22 @@ void setupMessagePosting() {
             @Override
             public void onClick(View v) {
                 String data = etMessage.getText().toString();
-                ParseObject message = ParseObject.create("Message");
-                message.put(**Message.USER_ID_KEY**, ParseUser.getCurrentUser().getObjectId());
-                message.put(**Message.BODY_KEY**, data);
+                //ParseObject message = ParseObject.create("Message");
+                //message.put(Message.USER_ID_KEY, ParseUser.getCurrentUser().getObjectId());
+                //message.put(Message.BODY_KEY, data);
+                // Using new `Message` Parse-backed model now
+                Message message = new Message();
+                message.setBody(data);
+                message.setUserId(ParseUser.getCurrentUser().getObjectId());
                 message.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                        Toast.makeText(ChatActivity.this, "Successfully created message on Parse",
-                                Toast.LENGTH_SHORT).show();
+                        if(e == null) {
+                    	    Toast.makeText(ChatActivity.this, "Successfully created message on Parse",
+                             Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e(TAG, "Failed to save message", e);
+                        }
                     }
                 });
                 etMessage.setText(null);
@@ -379,7 +392,7 @@ With our model defined with Parse and properly registered, we can now use this m
 
 ## 9. Create Custom List Adapter
 
-Create a class named `ChatListAdapter.java` with below code. This is a custom list adapter class which provides data to list view. In other words it renders the layout_row.xml in list by pre-filling appropriate information. We'll be using the open source `Picasso`library to load profile images. Add dependency for this library to the `app/build.gradle` file.
+Create a class named `ChatListAdapter.java` with below code. This is a custom list adapter class which provides data to list view. In other words it renders the chat_item.xml in list by pre-filling appropriate information. We'll be using the open source `Picasso`library to load profile images. Add dependency for this library to the `app/build.gradle` file.
 
 ```groovy
 ...
@@ -483,9 +496,13 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String data = etMessage.getText().toString();
-                ParseObject message = ParseObject.create("Message");
-                message.put(Message.USER_ID_KEY, userId);
-                message.put(Message.BODY_KEY, data);
+                //ParseObject message = ParseObject.create("Message");
+                //message.put(Message.USER_ID_KEY, userId);
+                //message.put(Message.BODY_KEY, data);
+                // Using new `Message` Parse-backed model now
+                Message message = new Message();
+                message.setBody(data);
+                message.setUserId(ParseUser.getCurrentUser().getObjectId());
                 message.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
@@ -503,7 +520,7 @@ public class ChatActivity extends AppCompatActivity {
     void refreshMessages() {
         // TODO:
     }
-...
+    ...
 }
 ```
 
@@ -514,7 +531,7 @@ Now we can fetch last 500 messages from parse and bind them to the ListView with
 ```java
 public class ChatActivity extends AppCompatActivity {
 ...
-    static final int MAX_CHAT_MESSAGES_TO_SHOW = 500;
+    static final int MAX_CHAT_MESSAGES_TO_SHOW = 50;
 ...
     // Query messages from Parse so we can load them into the chat adapter
     void refreshMessages() {
@@ -522,7 +539,9 @@ public class ChatActivity extends AppCompatActivity {
         ParseQuery<Message> query = ParseQuery.getQuery(Message.class);
         // Configure limit and sort order
         query.setLimit(MAX_CHAT_MESSAGES_TO_SHOW);
-        query.orderByAscending("createdAt");
+
+        // get the latest 500 messages, order will show up newest to oldest of this group
+        query.orderByDescending("createdAt");
         // Execute query to fetch all messages from Parse asynchronously
         // This is equivalent to a SELECT query with SQL
         query.findInBackground(new FindCallback<Message>() {
@@ -542,6 +561,20 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+}
+```
+
+If you get to this step, you will display the newest posts ordered from newest to oldest.  You can reverse the order without necessarily doing a linear sort by overriding the `getItem()` in your adapter to display the oldest items first:
+
+```java
+public class ChatListAdapter extends ArrayAdapter<Message> {
+
+  // Get the items in the reverse order:
+
+  @Override
+  public Object getItem(int position) {
+     return super.getItem(super.getCount() - position - 1);
+  }
 }
 ```
 
@@ -578,7 +611,6 @@ protected void onCreate(Bundle savedInstanceState) {
     }
     mHandler.postDelayed(mRefreshMessagesRunnable, POLL_INTERVAL);
 }
-
 ```
 
 See the [[repeating periodic tasks|Repeating-Periodic-Tasks#handler]] guide to learn more about the handler.

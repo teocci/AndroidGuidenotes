@@ -593,7 +593,10 @@ public class PostsDatabaseHelper extends SQLiteOpenHelper {
 
 ## SQLite Database Debugging 
 
-When working with SQLite, opening and inspecting the SQLite database can be helpful while debugging issues. The commands below will show how to get at the data (whether running on an emulator or an actual device). The commands should be performed **within the terminal or command-line**. Once you have the data, there are [desktop SQLite viewers](http://sqlitebrowser.org/) to help inspect the SQLite data graphically.
+When working with SQLite, opening and inspecting the SQLite database can be helpful while debugging issues. 
+You can leverage the [[Stetho library|Debugging-with-Stetho]] to view your data directly, or you can use the following command-line tools to retrieve the data.
+
+The commands below will show how to get at the data (whether running on an emulator or an actual device). The commands should be performed **within the terminal or command-line**. Once you have the data, there are desktop SQLite viewers such as [DB Browser for SQLite](http://sqlitebrowser.org/) or [SQLite Professional](https://itunes.apple.com/us/app/sqlite-professional-read-only/id635299994?mt=12) to help inspect the SQLite data graphically.
 
 ### On an Emulator
 
@@ -628,6 +631,10 @@ There isn't a `SQLite3` executable on the device so our only option is to downlo
 ./adb shell cp /data/data/<app package name>/databases/<database file name> /sdcard/
 ./adb pull /sdcard/<database file name>
 ```
+
+### Using Android Device Monitor
+
+You can go to `Tools`->`Android Device Monitor`->`File Explorer` and look inside the `/data/<app package name>/databases` and download the file locally.  You can then use one of the previously mentioned SQLite desktop viewers.
 
 ## References
 

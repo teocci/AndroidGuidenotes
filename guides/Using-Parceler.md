@@ -1,8 +1,10 @@
-### Overview
+## Overview
 
-Although creating Android [Parcelables](http://developer.android.com/reference/android/os/Parcelable.html) is usually at least 10x faster than using Serializable, creating [[Parcelable|Using-Parcelable]] objects requires creating a lot of boilerplate code in defining exactly the stream of data that should be serialized and deserialized as documented in [[this section|http://guides.codepath.com/android/Using-Parcelable#creating-a-parcelable-the-manual-way]].  While there are IDE plugins to help facilitate the creating of these objects, another option is to leverage a third-party library called [Parceler](https://parceler.org) that will help automate this work.   Underneath the surface this library generates the necessary wrapper classes for you at compile time automatically, saving you the repetitive steps required for leveraging the performance benefits of Parcelables.
+Although creating Android [Parcelables](http://developer.android.com/reference/android/os/Parcelable.html) is usually at least 10x faster than using Serializable, creating [[Parcelable|Using-Parcelable]] objects requires creating a lot of boilerplate code in defining exactly the stream of data that should be serialized and deserialized as documented in [[this section|http://guides.codepath.com/android/Using-Parcelable#creating-a-parcelable-the-manual-way]].  
 
-### Setup
+While there are IDE plugins to help facilitate the creating of these objects, another option is to leverage a third-party library called [Parceler](https://parceler.org) that will help automate this work.   Underneath the surface this library generates the necessary wrapper classes for you at compile time automatically, saving you the repetitive steps required for leveraging the performance benefits of Parcelables.
+
+## Setup
 
 To setup, we need to add the [android-apt](https://bitbucket.org/hvisser/android-apt) plugin to our classpath in our root `build.gradle` file.  This plugin enables the Parceler library to be used for annotation processing but not added to the final build.
 
@@ -22,6 +24,8 @@ dependencies {
   apt 'org.parceler:parceler:1.1.1'
 }
 ```
+
+## Usage
 
 ### Converting a model from Serializable objects
 
@@ -64,6 +68,8 @@ public class User {
 }
 ```
 
+### Wrapping Up a Parcel
+
 Next, simply wrap your objects with `Parcels.wrap()`:
 
 ```java
@@ -73,7 +79,9 @@ intent.putExtra("user", Parcels.wrap(user));
 startActivity(intent);
 ```
 
-On the receiving side, we simply need to unwrap the object:
+### Unwrapping a Parcel
+
+On the receiving side, we need to unwrap the object:
 
 ```java
 User user = (User) Parcels.unwrap(getIntent().getParcelableExtra("user"));
@@ -81,7 +89,13 @@ User user = (User) Parcels.unwrap(getIntent().getParcelableExtra("user"));
 
 The Parceler library works by using the `@Parcel` annotation to generate the wrapper classes for you.  It works with many of the most standard Java types, including the ones defined [here](https://github.com/johncarl81/parceler#parcel-attribute-types).
 
-### Using with ORM libraries
+### How it works
+
+You can also look at your `app/build/generated/source/apt` directory to see how it generates these wrapper classes.  Parceler essentially handles the steps described in [[this section|Using-Parcelable#creating-a-parcelable-the-manual-way]].
+
+<img src="http://imgur.com/6cR07Ae.png"/> 
+
+## Using with ORM libraries
 
 Some ORM libraries require extending the Java object with fields that Parceler is unable to serialize or deserialize.  In these cases, you should limit what fields should be analyzed in the inheritance using the `@Parcel(analyze={})` decorator:
 
@@ -94,12 +108,21 @@ public class User extends BaseModel {
 * [[DBFlow|DBFlow-Guide#using-with-the-parceler-library]]
 * [Realm.IO](https://github.com/johncarl81/parceler/issues/57)
 
-### How it works
+## Troubleshooting
 
-You can also look at your `app/build/generated/source/apt` directory to see how it generates these wrapper classes.  Parceler essentially handles the steps described in [[this section|Using-Parcelable#creating-a-parcelable-the-manual-way]].
+* Getting `java.lang.ClassCastException: SomeObject$$Parcelable cannot be cast to SomeObject` when extracting a Parcel from a `Bundle`?
+  * Be sure to call `Parcels.unwrap` when extracting the parcel from the `Bundle`:
 
-<img src="http://imgur.com/6cR07Ae.png"/> 
+    ```java
+    User user = (User) Parcels.unwrap(someIntent.getParcelableExtra("user"));
+    ```
 
-### References
+* Getting a null exception when accessing a member instance stored within a `Parceler` object? 
+  * Be sure that **all custom java objects** stored as fields within a Parceler object are **themselves also Parcels**. 
+  * Make sure that every parceled field is properly converted into a `Parceler` object.
+  * Breakpoint at the point right before the object is being wrapped and verify the member field is correct.
+  * Breakpoint again at the point right after the object is extracted and unwrapped and verify member field is correct.
+
+## References
 
 * <http://parceler.org/>

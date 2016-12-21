@@ -8,16 +8,17 @@ Login to [Travis CI](https://travis-ci.com/) and sign-in with your GitHub creden
 
 ### Setup
 
-You simply need to create a `.travis.yml` file in the root directory.  The simplest configuration to install the Build Tools and Android SDK 23.   You can launch the [[Gradle wrapper|Getting Started with Gradle]] to build and run emulator tests.
+You simply need to create a `.travis.yml` file in the root directory.  The simplest configuration to install the Build Tools and Android SDK 24.   You can launch the [[Gradle wrapper|Getting Started with Gradle]] to build and run emulator tests.    Make sure the `tools` line is first to ensure that Build Tools (esp for versions above API 24).  It also needs to be included twice.
 
 ```yaml
 language: android
 android:
   components:
-    - tools
+    - tools # to get the new `repository-11.xml`
+    - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
     - platform-tools
-    - build-tools-23.0.2
-    - android-23
+    - build-tools-24.0.2
+    - android-24
 
 script:
    - ./gradlew build connectedCheck
@@ -75,6 +76,8 @@ If you see an error code 137, chances are that the Travis build has ran out of m
 com.android.ide.common.process.ProcessException: org.gradle.process.internal.ExecException: Process 'command '/usr/lib/jvm/java-7-oracle/bin/java'' finished with non-zero exit value 137
 ```
 
+Here are a few ways to try to resolve:
+
 - If you are using [Google Play Services](https://developers.google.com/android/guides/setup), try to be more selective about the modules you import.  In prior versions before 6.5, you had to include all packages which often caused the 65K method limit to be reached.  If you only wish to use the Google Cloud Messaging package and not Google Fitness or Google Wear, you do not need to import 
 `com.google.android.gms:play-services:8.3.0`.  Instead, you can simply specify the libraries explicitly:
 
@@ -104,3 +107,16 @@ com.android.ide.common.process.ProcessException: org.gradle.process.internal.Exe
       }
     }
    ```
+
+
+- Disable container-based builds, which currently only have a maximum of 4GB of memory, whereas standard versions have a max of 7.5GB of memory (according to this [doc](https://docs.travis-ci.com/user/ci-environment/)):
+
+  ```yaml
+  sudo: required
+  ```
+
+- If you want to print any lint error issues, add this line:
+
+  ```yaml
+  after_failure: "cat $TRAVIS_BUILD_DIR/app/build/outputs/lint-results-debug.xml"
+  ```

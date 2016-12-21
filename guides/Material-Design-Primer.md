@@ -19,7 +19,7 @@ What exactly is "Material Design"? This can be difficult to answer because of th
  9. [[View Elevation and Shadows|Material-Design-Primer#elevation-and-shadows]] 
  10. [[Updated Dialog Themes|Material-Design-Primer#dialog-styles]]
 
-This represents just a few of the highlights that represent the implementation of Material design.
+This represents just a few of the highlights that represent the implementation of Material design. Watch this [Material Design Primer](https://realm.io/news/360andev-yash-prabhu-practical-guide-material-design-android-ui/) by Yash Prabhu or [Living in a Material World](https://www.youtube.com/watch?v=-SxPDFnCmF0) by Nidhi Shah for an in-depth look. 
 
 ## Design Guidelines
 
@@ -34,6 +34,20 @@ This new framework encompasses several changes to the interface of Android apps 
  * [Material Design Icons](http://materialdesignicons.com/) - Standard material icons from google and community
 
 Using these materials, you can understand and begin adhering to these guidelines for your own apps.
+
+## Material Code Samples
+
+There are a wide variety of sample apps to check out related to material design best practices including:
+
+* [Plaid](https://github.com/nickbutcher/plaid) - Showcase of material design and animations from Google
+* [Topeka](https://github.com/googlesamples/android-topeka) - Sample app from Google that showcases material design
+* [Google IO Schedule](https://github.com/google/iosched) - Google sample app showcasing modern Android UI
+* [Timber](https://github.com/naman14/Timber) - Modern music player showcasing beautiful material patterns
+* [Opengur](https://github.com/Kennyc1012/Opengur) - Android imgur viewer illustrating modern UI patterns
+* [Slide](https://github.com/ccrama/Slide) - Reddit Android app with material design
+* [Awesome-MaterialDesign](https://github.com/lightSky/Awesome-MaterialDesign) - List of popular material libraries and sample apps. 
+
+Hopefully these samples give you a solid starting point to explore material design. 
 
 ## Material Design Setup
 
@@ -51,19 +65,40 @@ As of June 2015, Google released the [[Design Support Library]] which helps simp
 
 ### Change the Application Theme
 
-Change your application theme to extend from a `Theme.AppCompat` theme in the `values/styles.xml` file:
+Change your application theme to extend from a `Theme.AppCompat` theme in the `values/styles.xml` file and apply the [material color properties](https://developer.android.com/training/material/theme.html#ColorPalette) to your application:
 
 ```xml
 <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+  <!-- colorPrimary is used for the default action bar background -->
   <item name="colorPrimary">@color/primary</item>
+  <!-- colorPrimaryDark is used for the status bar -->
   <item name="colorPrimaryDark">@color/primary_dark</item>
+  <!-- colorAccent is used as the default value for widgets -->
   <item name="colorAccent">@color/accent</item>
+  <!-- Default color of the text in your views  -->
+  <item name="android:textColorPrimary">@color/textPrimary</item>
 </style>
 ``` 
 
 These colors correspond to the following diagram:
 
 <img src="https://developer.android.com/training/material/images/ThemeColors.png" width="300"/>
+
+You can also override the following properties as needed for further customization:
+
+```xml
+<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+  <!-- ... styles above ... -->
+  <!-- Applies to views in their activated state (i.e checked or switches) -->   
+  <item name="colorControlActivated">@color/colorActivated</item>      
+  <!-- Applied to framework control highlights (i.e ripples or list selectors) -->
+  <item name="colorControlHighlight">@color/colorHighlight</item>  
+  <!-- Default color of the status bar at the top of your device  -->
+  <item name="android:statusBarColor">@color/primaryDark</item>
+  <!-- Default color of the navigation bar at the bottom of your device  -->
+  <item name="android:navigationBarColor">@color/primary</item>
+</style>
+```
 
 The available `Theme.Appcompat` which support material design include the following: `Theme.AppCompat`, `Theme.AppCompat.Light`, `Theme.AppCompat.Light.DarkActionBar`, `Theme.AppCompat.DeviceDefault`, `Theme.AppCompat.DeviceDefault.Light`, `Theme.AppCompat.DeviceDefault.Light.DarkActionBar`.
 
@@ -206,13 +241,7 @@ The extracted swatches will include vibrant and muted tones as well as foregroun
 
 ### Dialog Styles
 
-If you want your Dialogs to have a Material look and feel across all Android versions, you’ll want to use a library to achieve modern dialogs such as:
-
- * [material-dialogs](https://github.com/afollestad/material-dialogs)
- * [AlertDialogPro](https://github.com/fengdai/AlertDialogPro/)
- * [MaterialDialog](https://github.com/drakeet/MaterialDialog)
-
-![Material Dialog](https://i.imgur.com/U4mr2BB.jpg)
+If you want your Dialogs to have a Material look and feel across all Android versions, you can take advantage of the [[AppCompat|Migrating-to-the-AppCompat-Library]] library and use the alert dialogs.   
 
 ## References
 
@@ -221,3 +250,6 @@ If you want your Dialogs to have a Material look and feel across all Android ver
 * <http://code.hootsuite.com/tips-and-tricks-for-android-material-support-library/>
 * <http://code.hootsuite.com/tips-and-tricks-for-android-material-support-library-2-electric-boogaloo/>
 * <http://android-developers.blogspot.com/2015/06/more-material-design-with-topeka-for_16.html>
+* <https://github.com/lightSky/Awesome-MaterialDesign>
+* <https://realm.io/news/360andev-yash-prabhu-practical-guide-material-design-android-ui/>
+* <https://www.youtube.com/watch?v=-SxPDFnCmF0>

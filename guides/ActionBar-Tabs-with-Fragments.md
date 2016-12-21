@@ -68,10 +68,10 @@ Make sure to setup your app to use the correct support theme within the `Android
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.teocci.apps.teoccibootcampapp"
+    package="com.teocci.apps.teocciguidenotes"
     ...>
     <application
-        android:theme="@style/Theme.Base.AppCompat.Light.DarkActionBar"
+        android:theme="@style/Theme.Base.AppCompat.Light.DarkActionBar" 
         ...>
 </manifest>
 ```
@@ -83,18 +83,18 @@ For these compatibility items, you also need to be careful to **change the menu 
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:myapp="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/item_menu_ok"
+    <item android:id="@+id/item_menu_ok" 
           android:icon="@drawable/ic_action_ok"
-          android:title="@string/ok"
+          android:title="@string/ok" 
           myapp:showAsAction="ifRoom"></item>
-    <item android:id="@+id/item_menu_cancel"
+    <item android:id="@+id/item_menu_cancel" 
           android:icon="@drawable/ic_action_cancel"
-          android:title="@string/cancel"
+          android:title="@string/cancel" 
           myapp:showAsAction="ifRoom"></item>
 </menu>
 ```
 
-To setup tabs using ActionBar and fragments, you need to add a `TabListener` implementation to your application which defines the behavior of a tab when activated. A good default implementation is just [adding this](https://gist.github.com/nesquena/8b9f9ec29582afd4d138) to `SupportFragmentTabListener.java`.
+To setup tabs using ActionBar and fragments, you need to add a `TabListener` implementation to your application which defines the behavior of a tab when activated. A good default implementation is just [adding this](https://gist.github.com/nesquena/8b9f9ec29582afd4d138) to `SupportFragmentTabListener.java`. 
 
 Once you have created the `SupportFragmentTabListener` [from this snippet](https://gist.github.com/nesquena/8b9f9ec29582afd4d138) within your app, setup the ActionBar and define which tabs you would like to display and attach listeners for each tab:
 
@@ -203,7 +203,7 @@ You have assigned the tag `FIRST_TAB_TAG` to that fragment during construction a
 FirstFragment fragmentFirst = getSupportFragmentManager().findFragmentByTag(FIRST_TAB_TAG);
 ```
 
-This will return the fragment instance embedded for that tab.
+This will return the fragment instance embedded for that tab. 
 
 ### Communicating Arguments to Fragment
 
@@ -218,7 +218,7 @@ args.putString("someTitle", someTitle);
 Tab tab1 = actionBar
   ...
   .setTabListener(new FragmentTabListener<FirstFragment>(
-      R.id.flContainer, this, "First", FirstFragment.class,
+      R.id.flContainer, this, "First", FirstFragment.class, 
       firstBundle)); // <-- Bundle passed here
 ```
 
@@ -230,8 +230,8 @@ public class FirstFragment extends Fragment {
    public void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        // Get back arguments
-       int SomeInt = getArguments().getInt("someInt", 0);
-       String someTitle = getArguments().getString("someTitle", "");
+       int SomeInt = getArguments().getInt("someInt", 0);	
+       String someTitle = getArguments().getString("someTitle", "");	
    }
 }
 ```
@@ -256,11 +256,11 @@ We can also access arbitrary tabs, check the number of tabs or remove them:
 
 ```java
 // returns the tab object at position 0
-getSupportActionBar().getTabAt(0);
+getSupportActionBar().getTabAt(0); 
 // returns the total number of tabs
 getSupportActionBar().getTabCount();
 // Removes the first tab
-getSupportActionBar().removeTabAt(0);
+getSupportActionBar().removeTabAt(0); 
 // Returns the currently selected tab object
 getSupportActionBar().getSelectedTab();
 // Select a tab given the tab object
@@ -354,7 +354,7 @@ First, we need to create the `tab_bar_background` drawable which defines the tab
 </selector>
 ```
 
-Each state applies a different layer-list representing the different tab states. The indicator under the active tab comes from the background drawable. To draw the indicator, we created a layer-list for a rectangle shape with a 2dp stroke around the exterior, then offset the rectangle so that the top, left and right sides are outside the bounds of the view, so we will only see the bottom line.
+Each state applies a different layer-list representing the different tab states. The indicator under the active tab comes from the background drawable. To draw the indicator, we created a layer-list for a rectangle shape with a 2dp stroke around the exterior, then offset the rectangle so that the top, left and right sides are outside the bounds of the view, so we will only see the bottom line. 
 
 Finally, we need to set the background for the tabs to the `tab_bar_background` drawable in `res/values-v14/styles.xml`:
 
@@ -413,7 +413,7 @@ Browse the [Styling the ActionBar](https://developer.android.com/training/basics
  * You can supply a [custom view](http://developer.android.com/reference/android/app/ActionBar.Tab.html#setCustomView\(android.view.View\)) for each tab in truly custom cases that radically changes the look and feel of the tab.
  * Consider replacing tabs with the ViewPager and using a third-party [tab indicator](https://github.com/astuetz/PagerSlidingTabStrip) which more easily achieves the desired effect.
 
-Note that fully customizing tabs requires an understanding of [[Drawables]] as well.
+Note that fully customizing tabs requires an understanding of [[Drawables]] as well. 
 
 ### Styling Tabs with ActionBarSherlock
 
@@ -500,7 +500,7 @@ In `res/drawable/tab_bar_background.xml`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-
+ 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
   <item android:state_focused="false" android:state_selected="false" android:state_pressed="false" android:drawable="@color/transparent"/>
   <item android:state_focused="false" android:state_selected="true" android:state_pressed="false" android:drawable="@drawable/tab_bar_background_selected"/>
@@ -527,7 +527,7 @@ In `res/drawable/tab_bar_background_selected.xml`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-
+ 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:top="-5dp" android:left="-5dp" android:right="-5dp">
         <shape android:shape="rectangle">
@@ -535,13 +535,13 @@ In `res/drawable/tab_bar_background_selected.xml`:
         </shape>
     </item>
 </layer-list>
-```
+``` 
 
 In `res/drawable/tab_bar_background_selected_pressed.xml`:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-
+ 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:top="-5dp" android:left="-5dp" android:right="-5dp">
         <shape android:shape="rectangle">

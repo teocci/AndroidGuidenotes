@@ -65,6 +65,8 @@ if (browserIntent.resolveActivity(getPackageManager()) != null) {
 }
 ```
 
+You can also launch a Chrome tab if the app.  Take a look at [[this guide|Chrome-Custom-Tabs#setup]] for how to launch this implicit intent.
+
 ## Open Google Play Store
 
 Open app page on Google Play:
@@ -85,7 +87,7 @@ Uri smsUri = Uri.parse("tel:" + to);
 Intent intent = new Intent(Intent.ACTION_VIEW, smsUri);
 intent.putExtra("address", to);
 intent.putExtra("sms_body", message);
-intent.setType("vnd.android-dir/mms-sms");
+intent.setType("vnd.android-dir/mms-sms");//here setType will set the previous data null.
 if (intent.resolveActivity(getPackageManager()) != null) {
     startActivity(intent);
 }

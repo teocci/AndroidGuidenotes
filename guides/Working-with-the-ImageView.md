@@ -74,13 +74,9 @@ An ImageView can display an image differently based on the `scaleType` provided.
 
 **Note:** The `fitXY` scale type allows you to set the exact size of the image in your layout. However, be mindful of potential distortions of the image due to scaling. If you’re creating a photo-viewing application, you will probably want to use the `center` or `fitCenter` scale types.
 
-![Screens](https://i.imgur.com/vZHC82o.jpg)
+<img src="https://images.thoughtbot.com/blog-vellum-image-uploads/wDbiaqGSQyyErtXGSh6w_scaletype.png" width="600"/>
 
-**Pictured**: Examples of `android:scaleType` attribute.<br/>
-Top row (l-r) center, centerCrop, centerInside.<br/>
-Bottom row (l-r): fitCenter, fitStart, fitEnd, fitXY.
-
-**Remember** that if you wish to match the aspect ratio of the actual drawable, `adjustViewBounds=true` must be declared along with not defining an explicit width and/or height.
+Refer to this [ImageView ScaleType visual guide](https://robots.thoughtbot.com/android-imageview-scaletype-a-visual-guide) for additional reference. **Remember** that if you wish to match the aspect ratio of the actual drawable, `adjustViewBounds=true` must be declared along with not defining an explicit width and/or height.
 
 ### Supporting Multiple Densities
 
@@ -101,13 +97,17 @@ This means that if you generate a 100x100 for mdpi (1x baseline), then you shoul
 
 ![Densities](http://developer.android.com/images/screens_support/screens-densities.png)
 
+#### Final Android Resizer
+
 To resize images more easily, check out the [Final Android Resizer](https://github.com/asystat/Final-Android-Resizer) by [downloading and running this JAR](https://github.com/asystat/Final-Android-Resizer/blob/master/Executable%20Jar/Final%20Android%20Resizer.jar?raw=true). 
 
 <a href="https://github.com/asystat/Final-Android-Resizer/blob/master/Executable%20Jar/Final%20Android%20Resizer.jar?raw=true"><img src="https://i.imgur.com/Usx4iXH.png" alt="final resizer" width="350" /></a>
 
-This handy utility allows us to select a resources directory, choose an extra high density image and the tool will automatically generate the corresponding lower size images for us and place them in the correct folders.
+This handy utility allows us to select a resources directory, choose an extra high density image and the tool will automatically generate the corresponding lower size images for us and place the subfolders inside the generated `res-drawable` diretory within the actual `res` folder in your project as the example shows below in "Project" view (left) and the default "Android" view (right):
 
-See the [screens support](http://developer.android.com/guide/practices/screens_support.html) reference for a more detailed look at supporting a wide range of devices. Also check out the [iconography](http://developer.android.com/design/style/iconography.html) guide for more details.
+<img src="http://i.imgur.com/obCEvBY.png" width="250">&nbsp;<img src="http://i.imgur.com/XJAzEu6.png" width="250">
+
+Refer to the [screens support](http://developer.android.com/guide/practices/screens_support.html) reference for a more detailed look at supporting a wide range of devices. Also check out the [iconography](http://developer.android.com/design/style/iconography.html) guide for more details.
 
 ### Mipmaps and Drawables
 
@@ -208,3 +208,4 @@ See the [official tutorial](https://code.google.com/p/svg-android/wiki/Tutorial)
 * <http://developer.android.com/guide/practices/screens_support.html>
 * <https://code.google.com/p/svg-android/wiki/Tutorial>
 * <https://github.com/android/platform_frameworks_base/blob/master/core/java/android/widget/ImageView.java#L903-L907>
+* <https://robots.thoughtbot.com/android-imageview-scaletype-a-visual-guide>

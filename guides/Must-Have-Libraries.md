@@ -9,7 +9,7 @@ This "standard pack" listed below are libraries that are quite popular, widely a
 | Name            | Description                                                 |  
 | ----            | ------------                                                |
 | [[Retrofit|Consuming-APIs-with-Retrofit]] | A type-safe REST client for Android which intelligently maps an API into a client interface using annotations.            |
-| [[Picasso|Displaying-Images-with-the-Picasso-Library]] | A powerful image downloading and caching library for Android. |
+| [[Glide|Displaying-Images-with-the-Glide-Library]] | A powerful image downloading and caching library for Android. |
 | [[ButterKnife|Reducing-View-Boilerplate-with-Butterknife]] | Using Java annotations, makes Android development better by simplifying common tasks. |
 | [[Parceler|Using-Parceler]] | Android Parcelable made easy through code generation |
 | [IcePick](https://github.com/frankiesardo/icepick) | Android Instance State made easy |
@@ -74,14 +74,14 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [AutoParcel](https://github.com/frankiesardo/auto-parcel) - Port of Google AutoValue for Android with Parcelable generation goodies.
  * [Hugo](https://github.com/JakeWharton/hugo) - Easier logging within your app
  * [Logger](https://github.com/orhanobut/logger) - Much cleaner and easier logcat trace messages
- * [LeakCanary](https://github.com/square/leakcanary) - Easily catch memory leaks as they occur
  * [AndroidAnnotations](https://github.com/excilys/androidannotations) - Framework that speeds up Android development. It takes care of the plumbing, and lets you concentrate on what's really important. By simplifying your code, it facilitates its maintenance
  * [Calligraphy](https://github.com/chrisjenx/Calligraphy) - Custom fonts made easy
  * [EasyFonts](https://github.com/vsvankhede/easyfonts) - Easy preloaded custom fonts in your app
  * [AndroidViewAnimations](https://github.com/daimajia/AndroidViewAnimations) - Common property animations made easy
  * [AboutLibraries](https://github.com/mikepenz/AboutLibraries) - Automatically generates an *About this app* section, with a list of used libraries 
- * [SDK Manager Plugin](https://github.com/JakeWharton/sdk-manager-plugin) - Helpful plugin especially for group projects if you're missing an SDK version, haven't downloaded an API version, or your support library is updated.  
  * [EasyDeviceInfo](https://github.com/nisrulz/easydeviceinfo) - Get device information in a super easy way
+ * [Sensey](https://github.com/nisrulz/sensey) - Detecting gestures in a snap.
+
 
 ### Extensions 
 
@@ -97,14 +97,13 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [Picasso](http://square.github.io/picasso/) - A powerful image downloading and caching library for Android.
  * [Ion](https://github.com/koush/ion) - Powerful asynchronous networking library. [Download](https://github.com/koush/ion#get-ion) as a jar here.
  * [Android Async HTTP](http://loopj.com/android-async-http/) - Asynchronous networking client for loading remote content such as JSON.
- * [Chronos](https://github.com/RedMadRobot/Chronos) - Android library that handles asynchronous jobs.
  * [Volley](http://developer.android.com/training/volley/index.html) - Google's HTTP library that makes networking for Android apps easier and most importantly, faster.
- * [OkHttp](http://square.github.io/okhttp/) - Square's underlying networking library with support for asynchronous requests.
- * [Glide](https://github.com/bumptech/glide) - Picasso image loading alternative endorsed by Google 
- * [IceNet] (https://github.com/anton46/IceNet) -  Android networking wrapper consisting of a combination of Volley, OkHttp and Gson
+ * [[OkHttp|Using OkHttp]] - Square's underlying networking library with support for asynchronous requests.
+ * [[Glide|Displaying-Images-with-the-Glide-Library]] - Picasso image loading alternative endorsed by Google 
  * [Android Universal Image Loader](https://github.com/nostra13/Android-Universal-Image-Loader) - Popular alternative for image loading that can replace Picasso or Glide.
  * [Fresco](http://frescolib.org/) - An image management library from Facebook.
- * [Android Networking](https://github.com/amitshekhariitbhu/Android-Networking) - Android Networking is a        powerful library for doing any type of networking in Android applications which is made on top of OkHttp Networking Layer.
+ * [Fast Android Networking](https://github.com/amitshekhariitbhu/Fast-Android-Networking) -Fast Android Networking is a powerful library for doing any type of networking in Android applications which is made on top of OkHttp Networking Layer.
+
 
 ### ListView
 
@@ -121,18 +120,18 @@ Essentially this method is used to enable your code to short-circuit before exec
 ### RecyclerView
 
 * [UltimateRecyclerView](https://github.com/cymcsg/UltimateRecyclerView) - Augmented RecyclerView with refreshing, loading more, animation and many other features.
+* [AdvRecyclerView](https://github.com/h6ah4i/android-advancedrecyclerview) - Extended RecyclerView with swipe to dismiss, and draggable or expanding items. 
 * [android-parallax-recyclerview](https://github.com/kanytu/android-parallax-recyclerview) - An adapter which could be used to achieve a parallax effect on RecyclerView.
 * [sticky-headers-recyclerview](https://github.com/timehop/sticky-headers-recyclerview) - Sticky Headers decorator for Android's RecyclerView.
 * [FastAdapter](https://github.com/mikepenz/FastAdapter) - Simplify and speed up the process of filling your RecyclerView with data
 * [ItemAnimators](https://github.com/mikepenz/ItemAnimators) - RecyclerView animators to animate item add/remove/add/move
 * [GreedoLayout](https://github.com/500px/greedo-layout-for-android) - Full aspect ratio grid LayoutManager for Android's RecyclerView
+* [ChipsLayoutManager](https://github.com/BelooS/ChipsLayoutManager) - RecyclerView's LayoutManager which moves item to the next line when no space left on the current. Can represent google material chips guideline or tags view. 
 * [RecyclerViewHelper](https://github.com/nisrulz/recyclerviewhelper) - Provides the most common functions around recycler view like Swipe to dismiss, Drag and Drop, Divider in the ui, events for when item selected and when not selected, on-click listener for items.
+* [async-expandable-list](https://github.com/Ericliu001/async-expandable-list) - async-expandable-list provides solutions to displaying header-sub-items structure with simple api and asynchronously loading sub-list into an expandable list.   
 
 ### Easy Navigation 
 
- * [PagerSlidingTabStrip](https://github.com/astuetz/PagerSlidingTabStrip) - An interactive indicator to navigate between the different pages of a ViewPager.
-   * [jpardogo/PagerSlidingTabStrip](https://github.com/jpardogo/PagerSlidingTabStrip) - This fork of the original is actively maintained and has support for a material design look.
- * [ViewPagerIndicator](https://github.com/JakeWharton/Android-ViewPagerIndicator) - Paging indicator widgets compatible with the ViewPager from the Android Support Library and ActionBarSherlock. 
  * [JazzyViewPager](https://github.com/jfeinstein10/JazzyViewPager) - Pager with more animations
  * [ParallaxPager](https://github.com/prolificinteractive/ParallaxPager) - ViewPager with Parallax scrolling effects
  * [ParallaxHeaderViewPager](https://github.com/kmshack/Android-ParallaxHeaderViewPager) - Another ViewPager with Parallax scrolling effects
@@ -151,6 +150,7 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [android-shape-imageview](https://github.com/siyamed/android-shape-imageview) - Custom shaped android imageview components including bubble, star, heart, diamond.
  * [RoundedImageView](https://github.com/vinc3m1/RoundedImageView) - Easily round corners or create oval-shaped images with this popular library.
  * [Android StackBlur](https://github.com/kikoso/android-stackblur) - Dynamically blur images
+ * [BlurKit for Android](https://github.com/wonderkiln/blurkit-android) -  Fast blur-behind layout that parallels iOS.
  * [Android Bootstrap](https://github.com/Bearded-Hen/Android-Bootstrap) - Bootstrap UI widgets
  * [PhotoView](https://github.com/chrisbanes/PhotoView) - ImageView that supports touch gestures
  * [ShowcaseView](https://github.com/amlcurran/ShowcaseView) - Highlight the best bits of your app
@@ -172,11 +172,11 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [Scissors](https://github.com/lyft/scissors) - An easy image cropping library developed by Lyft.
  * [Material-SearchView](https://github.com/MiguelCatalan/MaterialSearchView) - Beautiful Material SearchView made simple.
  * [PersistentSearchBar](https://github.com/arimorty/floatingsearchview) - Implementation of a persistent search bar.
+ * [Android Material Intro Screen](https://github.com/TangoAgency/material-intro-screen/) - Library for easily adding intro screen to app.
 
 ### Drawing
 
- * [Leonids](https://github.com/plattysoft/Leonids) - Simple and easy particle effects ([See Tutorial](http://www.plattysoft.com/2014/05/30/leonids-particle-system-lib/))
- * [AChartEngine](http://jaxenter.com/effort-free-graphs-on-android-with-achartengine-46199.html) - This is a charting software library for Android applications
+ * [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) - A powerful Android chart view / graph view library, supporting line- bar- pie- radar- bubble- and candlestick charts as well as scaling, dragging and animations.
  * [HoloGraphLibrary](https://github.com/Androguide/HoloGraphLibrary) - Newer graphing library
  * [EazeGraph](https://github.com/blackfizz/EazeGraph) - Another newer library with potential
  * [AndroidCharts](https://github.com/dacer/AndroidCharts) - Easy to use charts
@@ -184,7 +184,9 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [AndroidPlot](http://androidplot.com/docs/quickstart/) - plotting library for Android
  * [WilliamChart](https://github.com/diogobernardino/WilliamChart) - Flexible charting library with useful motion capabilities.
  * [HelloCharts](https://github.com/lecho/hellocharts-android) - Charts/graphs library for Android with support for scaling, scrolling and animations.
- * [MPAndroidChart](https://github.com/PhilJay/MPAndroidChart) - A powerful Android chart view / graph view library, supporting line- bar- pie- radar- bubble- and candlestick charts as well as scaling, dragging and animations.
+ * [Leonids](https://github.com/plattysoft/Leonids) - Simple and easy particle effects ([See Tutorial](http://www.plattysoft.com/2014/05/30/leonids-particle-system-lib/))
+ * [Confetti](https://github.com/jinatonic/confetti) - Newer particle effects library. 
+ * [AChartEngine](http://jaxenter.com/effort-free-graphs-on-android-with-achartengine-46199.html) - This is a charting software library for Android applications
 
 ### Image Processing
 
@@ -194,6 +196,7 @@ Essentially this method is used to enable your code to short-circuit before exec
 * [picasso-transformations](https://github.com/wasabeef/picasso-transformations) - Library for processing images via Picasso
 * [glide-transformations](https://github.com/wasabeef/glide-transformations) - Process images via Glide
 * [ImageEffectFilter](https://github.com/mnafian/ImageEffectFilter) - Sample code for processing images.
+* [VidEffects](https://github.com/krazykira/VidEffects) - Apply manipulation effects to videos.
 
 ### Scanning
 
@@ -210,6 +213,7 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [greenDAO](https://github.com/greenrobot/greenDAO)
  * [SugarORM](http://satyan.github.io/sugar/)
  * [RxCache](https://github.com/VictorAlbertos/RxCache) - Reactive caching library for Android
+ * [Android-Orma](https://github.com/gfx/Android-Orma) - A type-safe ORM for Android as a wrapper of SQLiteDatabase
  * [ORMLite](http://ormlite.com/sqlite_java_android_orm.shtml)
  * [SQLBrite](https://github.com/square/sqlbrite) - Lightweight wrapper around SQLiteOpenHelper
  * [[Cupboard|Easier-SQL-with-Cupboard]] - Popular take on SQL wrapper
@@ -219,6 +223,10 @@ Essentially this method is used to enable your code to short-circuit before exec
  * [Hawk](https://github.com/orhanobut/hawk) - Persistent secure key/value store
  * [Poetry](https://github.com/elastique/poetry) - Persist JSON directly into SQLite
  * [JDXA](http://softwaretree.com/v1/products/jdxa/jdxa.html) - The KISS ORM for Android - Simple, Non-intrusive, and Flexible
+
+### Binding
+ * [RecyclerViewBinding](https://github.com/radzio/android-data-binding-recyclerview) - Library for easily add recycler view data bindings.
+ * [CommandDataBinding](https://github.com/radzio/android-data-binding-command) - Library for better handling onClick actions.
 
 ### Compatibility
 
@@ -241,20 +249,21 @@ This is a list of popular scrolling and parallax libraries:
 ### Debugging
 
 * [Stetho](http://facebook.github.io/stetho/) - A debug bridge for Android applications which could be used for multiple purposes not limited to Network Inspection, Database Inspection and Javascript Console.
+* [Android Debug Database](https://github.com/amitshekhariitbhu/Android-Debug-Database) - Android Debug Database allows you to view databases and shared preferences directly in your browser in a very simple way.
+* [Bugfender](https://github.com/bugfender/bugfender-android-sample/) - Cloud storage for your app logs, track user behaviour to find problems in your mobile apps.
 
 ## Resources
 
 Check out the following resources for finding libraries:
 
- * [Android Elementals](https://github.com/cesards/AndroidElementals)
+ * <http://android-arsenal.com>
  * [Wasabeef Core Libraries](https://github.com/wasabeef/awesome-android-libraries)
  * [Wasabeef UI Libraries](https://github.com/wasabeef/awesome-android-ui)
+ * [Snowdream Android Library Repository](https://snowdream.github.io/awesome-android/)
  * [Android-Libs.com](http://android-libs.com)
- * <http://androidlibs.org/>
  * <http://appdevwiki.com/wiki/show/HomePage>
- * <http://androidweekly.net/toolbox>
- * <http://android-arsenal.com>
  * <http://www.libtastic.com>
+ * [Android Libhunt](https://android.libhunt.com/)
 
 ## References
 
@@ -266,3 +275,4 @@ Check out the following resources for finding libraries:
  * <https://github.com/erikwt/PullToRefresh-ListView>
  * https://github.com/jfeinstein10/SlidingMenu
  * <http://square.github.io/picasso/>
+ * <https://cloudrail.com/best-android-libraries-for-developers/>

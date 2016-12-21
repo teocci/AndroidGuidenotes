@@ -9,17 +9,18 @@ dynamically within the Java code.
 
 ### Animation Types
 
-There are actually two distinct animation frameworks for Android:
+There are actually three distinct animation frameworks for Android:
 
  - [Property Animations](http://developer.android.com/guide/topics/graphics/prop-animation.html) - The most powerful and flexible animation system introduced in Android 3.0.
  - [View Animations](http://developer.android.com/guide/topics/graphics/view-animation.html) - Slower and less flexible; deprecated since property animations were introduced
+ - [Transition Animations](https://developer.android.com/training/transitions/overview.html) - For Android 4.4 devices and above, the Transitions API framework enables layout changes within an activity.  Using the [[design support library|Design-Support-Library]], [[view hierarchy animations]] can be supported down to Android 4.0 devices.
 
 Powered by these animation frameworks, there are five relevant types of animations:
 
  * [Property Animations](http://developer.android.com/guide/topics/graphics/prop-animation.html) - This is the animation of any property between two values. Frequently used to animate views on screen such as rotating an image or fading out a button.
  * [[Activity Transitions|Animations#activity-transitions]] - Animates the transition as an Activity enters the screen when an Intent is executed.
  * [Fragment Transitions](http://android-er.blogspot.com/2013/04/implement-animation-in.html) - Animates the transition as a fragment enters or exits the screen when a transaction occurs.
- * [Layout Animation](http://developer.android.com/guide/topics/graphics/prop-animation.html#layout) - This allows us to enable animations on any layout container or other ViewGroup such as a ListView. With layout animations enabled, all changes to views inside the container will be animated.
+ * [[Layout Animations|Animations#layout-animations]] - This allows us to enable animations on any layout container or other ViewGroup such as LinearLayout, RelativeLayout, or ListView.  Using the Transitions API (for Android 4.4 devices and above), the animations to the view changes can be specified.  For lower versions, [layout animations](https://developer.android.com/guide/topics/graphics/prop-animation.html#layout) can still be enabled, but there is no way to dictate how the transitions occur.
  * [Drawable Animations](http://developer.android.com/guide/topics/graphics/drawable-animation.html) - Used to animate by displaying drawables in quick succession
 
 ### Material Animation Principles
@@ -224,7 +225,7 @@ This applies multiple property animations in parallel including opacity change, 
 If we want to be able to compile the code to run on pre-ICS devices, we can leverage the support library's `ViewCompat.animate` static method instead. If you are an Android Studio user, first add the following dependency to your `app/build.gradle` file:
 
 ```gradle
-compile 'com.android.support:support-v4:23.1.0'
+compile 'com.android.support:support-v4:24.2.0'
 ```
 
 We can now run concurrent animations with the following:
@@ -525,11 +526,77 @@ This results in the following:
 
 ![Activity Transition](https://i.imgur.com/lRU3wrn.gif)
 
+#### Activity Transitions in Lollipop
+
+The Transitions API (only for Android 5.0 and above) introduces a new way of performing activity transitions, which obviously is not backwards compatible with older Android devices but provides the foundation for performing layout animations within activity [[view hierarchies|View Hierarchy Animations]].  You can create different types of XML tags `res/transition` include `slide`, `fade`, `explode`, `autoTransition`, and `recolor`.  For instance, a slide right could be defined as `slide_right.xml`:
+
+```xml
+<slide xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:slideEdge="right"
+    android:duration="1000"/>
+```
+
+We could then inflate this transition using the `TransitionInflater` class:
+
+```java
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // inflate transition XML & set exit transition
+        Transition transition = TransitionInflater.from(this).inflateTransition(R.transition.slide_right);        
+        getWindow().setExitTransition(transition);
+
+        // inflate xml here
+```
+
+Note that we set the exit transition of the activity.  There are actually 4 different transitions that work in pairs: exit/enter and return/reenter.  The exit transition should be declared on the departing activity, and the enter transition should be declared on the incoming activity.  If no return and reenter transitions are specified, then the transitions used will be played back in reverse.
+
+<img src="http://imgur.com/jrpSvv6.png"/>
+
+We also need to change the entering activity as well with a `slide_left.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<slide xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="1000"
+    android:slideEdge="left" />
+```
+
+```java
+public class SecondActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // setup before inflating
+        Transition a = TransitionInflater.from(this).inflateTransition(R.transition.slide_right);
+        getWindow().setEnterTransition(a);
+    }
+
+}
+```
+
+One particular change is that `startActivity` needs to be called with a special bundle:
+
+```java
+Intent i = new Intent(MainActivity.this, SecondActivity.class);
+// options need to be passed when starting the activity
+ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(MainActivity.this);
+startActivity(i, options.toBundle());
+```
+
+Also, if you need to navigate back to the previous screen, use `finishAfterTransition()` instead of `finish()`.  Normally clicking the back button already calls this method for you.
+
+You can also control what parts of the activity transitions are excluded from this animation sequence, especially for shared elements between screens.  See [this section](Shared-Element-Activity-Transition#excluding-window-content-transitions) for more details.
+
 #### Browsing Transition Samples
 
 You can see several complete examples of activity transitions in the following resources:
 
- * [Card Flip Animation](http://stackoverflow.com/a/19959933/313399)
+ * [Card Flip Animation 1](http://stackoverflow.com/a/19959933/313399), [Card Flip 2](http://www.thedroidsonroids.com/blog/android/android-flipa-card-animation-exlpained/), [Card Flip 3](http://stackoverflow.com/a/25701636).
  * [Vine Activity Transition](http://blog.quent.in/index.php/2013/06/activity-transition-animations-like-the-vine-android-application/)
  * [Sliding In From Left Animation](http://android-er.blogspot.com/2013/04/custom-animation-while-switching.html)
  * [Sliding Drawer Animation](http://blog.blundell-apps.com/animate-an-activity/)
@@ -624,7 +691,7 @@ A particular animation can be specified when the layout first appears on screen.
 First, let's define an animation we'd like to use when the views in the layout appear on the screen in `res/anim/slide_right.xml` which defines sliding in right from outside the screen:
 
 ```xml
-<set  xmlns:android="http://schemas.android.com/apk/res/android"  
+<set xmlns:android="http://schemas.android.com/apk/res/android"  
       android:interpolator="@android:anim/accelerate_interpolator">
     <translate android:fromXDelta="-100%p" android:toXDelta="0"
             android:duration="1000" /> 
@@ -656,7 +723,7 @@ and now when you launch the application, the views within this layout will slide
 
 [Layout Change Animations](http://developer.android.com/training/animation/layout.html) allow us to enable animations on any Layout container or other ViewGroup such as a ListView. With layout animations enabled, all changes to views inside the container will be animated automatically. This is especially useful for ListViews which causes items to be animated as they are added or removed.
 
-To enable the default animations, all we have to do is set the `animateLayoutChanges` property on any ViewGroup within the XML:
+In the past, the only way to animate changes within a layout was to set the `animateLayoutChanges` property on any ViewGroup within the XML:
 
 ```xml
 <LinearLayout
@@ -672,6 +739,8 @@ To enable the default animations, all we have to do is set the `animateLayoutCha
 ```
 
 The [android:animateLayoutChanges](http://developer.android.com/reference/android/view/ViewGroup.html#attr_android:animateLayoutChanges) property enables a default animation if no further customization is made.
+
+With the introduction of the Transitions API framework, the animation sequences can now be controlled as well.  See [[this guide|View Hierarchy Animations]] for more details.
 
 ## Animated Images
 
@@ -721,7 +790,7 @@ and now we have this:
 
 You can also check out the popular [android-gif-drawable](https://github.com/koral--/android-gif-drawable) library for another solution. An alternative method is simply to [use a WebView](http://droid-blog.net/2011/10/17/tutorial-how-to-play-animated-gifs-in-android-part-3/). 
 
-## Lollipop Animations
+## Material Animations
 
 In Android 5.0, several new animation features were introduced including:
 
@@ -729,7 +798,7 @@ In Android 5.0, several new animation features were introduced including:
  * [[Ripple Animation]] - Used provide an instantaneous visual confirmation at the point of contact when users interact with UI elements.
  * [[Circular Reveal Animation]] - Reveal is a new animation introduced in Android L that animates the view's clipping boundaries. Often used in conjunction with [[material floating action buttons|Floating Action Buttons]].
 
-Note that these animations require **lollipop or newer** and do not work on devices with an Android version less than API 21. Around 30% of devices have at least lollipop (Dec 2015), so the time spent using one of these animations requires thought to determine if it is worth the effort.
+Note that these animations require **lollipop or newer** and do not work on devices with an Android version less than API 21. Around 50% of devices have at least lollipop (Aug 2016), so the time spent using one of these animations requires thought to determine if it is worth the effort. Refer to this [Material Animations sample app](https://github.com/lgvalle/Material-Animations) for detailed explanations with examples.
 
 ## Particle Effects
 
@@ -741,10 +810,15 @@ Precisely because its main use is games, all engines have support for particle s
 
 ## Libraries
 
+The following animations library provide easy ways to plug-in animations into your app:
+
 * [AndroidViewAnimations](https://github.com/daimajia/AndroidViewAnimations) - Common property animations made easy.
+* [ViewAnimator](https://github.com/florent37/ViewAnimator) - A wrapper to simplify common property animations.
+* [RecyclerView Animators](https://github.com/wasabeef/recyclerview-animators) - Animate the items in your RecyclerView.
 * [ListViewAnimations](https://github.com/nhaarman/ListViewAnimations) - List view item animations made simple including insertion and deletion.
 * [NineOldAndroids](http://nineoldandroids.com/) - Compatibility library supporting property animations all the way back to Android 1.0 (deprecated but still works).
 * [Leonids](https://github.com/plattysoft/Leonids) - Simple particle effects for Android.
+* [Like Button](https://github.com/jd-alexander/LikeButton) - Easily animate action buttons. 
 
 ## References
 
@@ -764,3 +838,9 @@ Precisely because its main use is games, all engines have support for particle s
  * <http://www.google.com/design/spec/animation/authentic-motion.html> 
  * <https://plus.google.com/+JakeWharton/posts/hPZYyEXaSqk>
  * <https://twitter.com/jakewharton/status/486346048755884034>
+ * <https://github.com/lgvalle/Material-Animations>
+ * <http://cogitolearning.co.uk/?p=1224>
+ * <https://medium.com/@andkulikov/animate-all-the-things-transitions-in-android-914af5477d50>
+ * <https://android.googlesource.com/platform/frameworks/base/+/3da2834/core/java/android/transition/TransitionInflater.java>
+ * <http://www.androiddesignpatterns.com/2014/12/activity-fragment-transitions-in-android-lollipop-part1.html>
+ * <https://www.youtube.com/watch?v=4L4fLrWDvAU>

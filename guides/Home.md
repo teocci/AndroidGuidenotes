@@ -32,7 +32,7 @@ If you are an experienced engineer with 2+ years of professional experience in s
 
 **Totally new to Android?** Start here.
 
-* [Getting Started as a Developer](http://courses.teocci.com/snippets/intro_to_android/non_coders) (New to programming?)
+
 * [[Getting Started with Android|Beginning Android Resources]] (Detailed Post With Many Links)
 * [Setting up Android Studio](http://goo.gl/X2SVFR) (Installation Slides) or [[Setting up IntelliJ IDEA]]
 * [[Installing a Faster Emulator|Genymotion-2.0-Emulators-with-Google-Play-support]] (Genymotion Guide)
@@ -43,6 +43,7 @@ If you are an experienced engineer with 2+ years of professional experience in s
 * [[Todo App Guide|Basic Todo App Tutorial]] (Todo App steps in guide format)
 * [[Sample Android Apps]] (Code repositories)
 * [[Keeping Updated with Android]] (Podcasts, blogs, newsletters)
+* [[Effective Java for Android]] (Java best practices)
 * [[Using Kotlin for Android development]] (Alternative syntax to Java)
 
 **Debugging Android**. Debug and troubleshoot issues.
@@ -50,13 +51,16 @@ If you are an experienced engineer with 2+ years of professional experience in s
 * [[Debugging Exceptions within your App]] (App crashing?)
 * [Debugging Android App Slides](https://docs.google.com/presentation/d/1DUigTm6Uh43vatHkB4rFkVVIt1zf7zB7Z5tpGTy2oFY/edit?usp=sharing)
 * [[Troubleshooting Common Issues]] (Running into problems?)
+* [[Troubleshooting API Calls]] (how to inspect network traffic)
 
 **External Resources**. Great external content to explore.
 
 * [[Android Resources List|Beginning Android Resources#beginning-android-resources]]
+* [Android Tips and Tricks Repo](https://github.com/nisrulz/android-tips-tricks/blob/master/Readme.md)
 * [Google Android Interactive Codelabs](https://codelabs.developers.google.com/?cat=Android)
 * [Google Android Glossary](https://developers.google.com/android/for-all/vocab-words/) (Defining Common Terms)
 * [Android Learning Resources](https://github.com/CodementorIO/Android-Learning-Resources)
+* [Awesome Android Complete Reference](https://github.com/amitshekhariitbhu/awesome-android-complete-reference)
 * [[Free Android Curriculum]] (Additional Android resources and slides)
 
 **Using Eclipse?** See below.
@@ -77,9 +81,10 @@ Exploring the core of app development:
 * [[Understanding the Activity Lifecycle|Activity Lifecycle]] (How does an activity work?)
 * [[Handling Configuration Changes]] (Screen Rotation)
 * [[Migrating to the AppCompat Library]] (Using the Support Libraries)
-* [[App Permissions|Understanding App Permissions]] (How to request the permissions you need)
+* [[App Permissions|Understanding App Permissions]] (How to request the permissions you need) 
 * [[Managing Runtime Permissions with PermissionsDispatcher]]
 * [[Replacing Enums with Enumerated Annotations]] (StringDef, IntDef for validated types)
+* [[Understanding the Android Application Class]] (Custom application object)
 
 ## Views and Layouts
 
@@ -112,6 +117,7 @@ Exploring the gritty details of views, layout, styling and common UI patterns:
 * [[Shared Element Activity Transition]] (Android 5.0)
 * [[Circular Reveal Animation]] (Android 5.0)
 * [[Design Support Library]] (Material Design Library)
+* [[View Hierarchy Animations]] (Android 4.0)
 * [[Chrome Custom Tabs]]
 
 ### AdapterViews
@@ -175,13 +181,15 @@ Diving into the networking and model layers for data-driven apps:
 * [[Handling ProgressBars]] (with Long-Running Tasks)
 * [[Rotten Tomatoes Networking Tutorial]]
 * [[Networking with the Volley Library]]
+* [[Networking with the OkHttp Library|Using-OkHttp]]
+* [[Networking with the Fast Android Networking Library]]
+* [[Consuming APIs with Retrofit]]
 * [[Displaying Images with the Fresco Library]]
 * [[Building Data-driven Apps with Parse]]
 * [[Configuring a Parse Server]]
 * [[Building Simple Chat Client with Parse]]
 * [[Troubleshooting Common Issues with Parse]]
-* [[Consuming APIs with Retrofit]]
-* [[Sending and Receiving Data with Sockets]]
+* [[Sending and Receiving Data with Sockets]] 
 * [[Building Data driven Apps with Firebase]]
 
 ## Persistence
@@ -196,11 +204,12 @@ Exploring the strategies for data persistence:
 * [[Settings with PreferenceFragment]]
 * [[Loading Contacts with Content Providers]] (CursorLoader, LoaderManager)
 * [[Interacting with the Calendar]] (CalendarProvider)
-* [[Creating Content Providers]] (**Needs Attention**)
+* [[Creating Content Providers]] 
 * [[Clean Persistence with Sugar ORM]] (Installation, Queries, Migrations)
 * [[DBFlow ORM Guide|DBFlow-Guide]] (Installation, Queries)
 * [[Easier SQL with Cupboard]]
 * [[Powerful Persistence with JDXA ORM]]
+* [[Storing Secret Keys in Android]] (API keys, credentials)
 
 ## Fragments
 
@@ -256,7 +265,7 @@ Covers usage of more advanced third-party libraries and SDKs that save time and 
 
 * [[Must Have Libraries]] (Networking, Persistence, Compatibility, Convenience, etc)
 * [[Popular External Tools]] (Analytics, Crash Reporting)
-* [[Dependency Injection with Dagger 2]]
+* [[Dependency Injection with Dagger 2]] 
 * [[Reducing View Boilerplate with Butterknife]] (View Annotations)
 * [[Communicating with an Event Bus]] (Using EventBus to publish and receive events)
 * [[Using Parceler]] (Creating Parcelable objects)
@@ -271,6 +280,7 @@ Covers guides specifically related to developing and publishing robust Android a
 * [[Publishing with Android Studio|Publishing-to-the-Play-Store]]
 * [[Debugging and Profiling Apps]] (**Needs Attention**)
 * [Android Best Practices](https://github.com/futurice/android-best-practices)
+* [[Creating App Shortcuts in Launcher]] (**Needs Attention**)
 
 ## Workflow
 
@@ -283,11 +293,12 @@ Focused on issues like deployment, dependency management, etc:
 * [[Setting up Travis CI]]
 * [[Collaborating on Projects with Git]] (Git, Team)
 * [[Presenting an Android Device]] (Cast Device to Laptop)
-* [[Recording Video of an Android Device]]
+* [[Recording Video of an Android Device]] 
 * [[Configuring ProGuard]]
 * [[Lambda Expressions]] (Retrolambda and Java 8)
+* [[Android for Work]] (Deploying Android to the Enterprise)
 
-## Contributing
+## Contributing 
 
 * [[Contributing back to Android]]
 * [[Building your own Android Library]]

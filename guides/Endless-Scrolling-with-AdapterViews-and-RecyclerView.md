@@ -8,9 +8,7 @@ In both cases, the information needed to implement the scrolling include determi
 
 <a href="http://imgur.com/6E7X1pr.png" target="_blank"><img src="http://imgur.com/6E7X1pr.png"/></a>
 
-To provide the appearance of endless scrolling, it's important to fetch data before the user gets to the end of the list.  Adding a threshold value therefore helps anticipate the need to append more data:
-
-<a href="http://imgur.com/NRr6dHK.png" target="_blank"><img src="http://imgur.com/NRr6dHK.png"/></a>
+To provide the appearance of endless scrolling, it's important to fetch data before the user gets to the end of the list.  Adding a threshold value therefore helps anticipate the need to append more data. 
 
 ## Implementing with ListView or GridView
 
@@ -100,19 +98,23 @@ public class MainActivity extends Activity {
           public boolean onLoadMore(int page, int totalItemsCount) {
               // Triggered only when new data needs to be appended to the list
               // Add whatever code is needed to append new items to your AdapterView
-              customLoadMoreDataFromApi(page); 
-              // or customLoadMoreDataFromApi(totalItemsCount); 
+              loadNextDataFromApi(page); 
+              // or loadNextDataFromApi(totalItemsCount); 
               return true; // ONLY if more data is actually being loaded; false otherwise.
           }
         });
     }
     
-    // Append more data into the adapter
-    public void customLoadMoreDataFromApi(int offset) {
-      // This method probably sends out a network request and appends new data items to your adapter. 
-      // Use the offset value and add it as a parameter to your API request to retrieve paginated data.
-      // Deserialize API response and then construct new objects to append to the adapter
-    }
+
+   // Append the next page of data into the adapter
+   // This method probably sends out a network request and appends new data items to your adapter. 
+   public void loadNextDataFromApi(int offset) {
+      // Send an API request to retrieve appropriate paginated data 
+      //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+      //  --> Deserialize and construct new model objects from the API response
+      //  --> Append the new data objects to the existing set of items inside the array of items
+      //  --> Notify the adapter of the new items made with `notifyDataSetChanged()`
+   }
 }
 ```
 
@@ -132,34 +134,54 @@ To start handling the scroll events for steps 2 and 3, we need to use the `addOn
 
 ```java
 public class MainActivity extends Activity {
+    // Store a member variable for the listener
+    private EndlessRecyclerViewScrollListener scrollListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
        // Configure the RecyclerView
        RecyclerView rvItems = (RecyclerView) findViewById(R.id.rvContacts);
        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-       recyclerView.setLayoutManager(linearLayoutManager);
-       // Add the scroll listener
-       rvItems.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+       rvItems.setLayoutManager(linearLayoutManager);
+       // Retain an instance so that you can call `resetState()` for fresh searches
+       scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
            @Override
-           public void onLoadMore(int page, int totalItemsCount) {
+           public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                // Triggered only when new data needs to be appended to the list
                // Add whatever code is needed to append new items to the bottom of the list
-               customLoadMoreDataFromApi(page); 
+               loadNextDataFromApi(page);
            }
-      });
+      };
+      // Adds the scroll listener to RecyclerView
+      rvItems.addOnScrollListener(scrollListener);
   }
 
-  // Append more data into the adapter
+  // Append the next page of data into the adapter
   // This method probably sends out a network request and appends new data items to your adapter. 
-  public void customLoadMoreDataFromApi(int page) {
-      // Send an API request to retrieve appropriate data using the offset value as a parameter.
-      //  --> Deserialize API response and then construct new objects to append to the adapter
-      //  --> Notify the adapter of the changes
+  public void loadNextDataFromApi(int offset) {
+      // Send an API request to retrieve appropriate paginated data 
+      //  --> Send the request including an offset value (i.e `page`) as a query parameter.
+      //  --> Deserialize and construct new model objects from the API response
+      //  --> Append the new data objects to the existing set of items inside the array of items
+      //  --> Notify the adapter of the new items made with `notifyItemRangeInserted()`
   }
 }
 ```
 
-You can refer to this [code sample for usage](https://gist.github.com/nesquena/8a976dd3d6f866518db2cfe7f9cb0db7) and [this code sample](https://gist.github.com/nesquena/d09dc68ff07e845cc622) for the full endless scroll source code. 
+### Resetting the Endless Scroll State
+
+When you intend to perform a new search, make sure to clear the existing contents from the list and notify the adapter the contents have changed **as soon as possible**.  Make sure also to reset the state of the `EndlessRecyclerViewScrollListener` with the `resetState` method:
+
+```java
+// 1. First, clear the array of data
+listOfItems.clear();
+// 2. Notify the adapter of the update
+recyclerAdapterOfItems.notifyDataSetChanged(); // or notifyItemRangeRemoved
+// 3. Reset endless scroll listener when performing a new search
+scrollListener.resetState();
+```
+
+You can refer to this [code sample for usage](https://gist.github.com/rogerhu/17aca6ad4dbdb3fa5892) and [this code sample](https://gist.github.com/nesquena/d09dc68ff07e845cc622) for the full endless scroll source code. 
 
 All of the code needed is already incorporated in the `EndlessRecyclerViewScrollListener.java` code snippet above. However, if you wish to understand how the endless scrolling is calculated, the [detailed explanation is available here](https://hackmd.io/s/HyLTXPvH).
 
@@ -171,9 +193,21 @@ If you are running into problems, please carefully consider the following sugges
 
 * In order for the pagination system to continue working reliably, you should make sure to **clear the adapter** of items (or notify adapter after clearing the array) before appending new items to the list.  For RecyclerView, it is highly recommended to make more granular updates when notifying the adapter.  See this [video talk] (https://youtu.be/imsr8NrIAMs?t=8m27s) for more context.
 
-* In order for this pagination system to trigger, keep in mind that as `customLoadMoreDataFromApi` is called, new data needs to be **appended to the existing data source**. In other words, only clear items from the list when on the initial "page". Subsequent "pages" of data should be appended to the existing data.
+* In order for this pagination system to trigger, keep in mind that as `loadNextDataFromApi` is called, new data needs to be **appended to the existing data source**. In other words, only clear items from the list when on the initial "page". Subsequent "pages" of data should be appended to the existing data.
 
-* For the `RecyclerView`, if you intend to clear the contents of the list and start endless scrolling again, make sure to clear the contents of the list and notify the adapter the contents have changed **as soon as possible**.  The reason is that `RecyclerView` will trigger a new `onScroll` event and allow the endless scrolling code to reset itself.   
+* If you see `Cannot call this method in a scroll callback. Scroll callbacks might be run during a measure & layout pass where you cannot change the RecyclerView data.`, you need to do the following inside your `onLoadMore()` method as outlined in [this Stack Overflow](http://stackoverflow.com/questions/39445330/cannot-call-notifyiteminserted-method-in-a-scroll-callback-recyclerview-v724-2) article to delay the adapter update:
+
+    ```java
+    // Delay before notifying the adapter since the scroll listeners 
+    // can be called while RecyclerView data cannot be changed.
+    view.post(new Runnable() {
+        @Override
+        public void run() {
+            // Notify adapter with appropriate notify methods
+            adapter.notifyItemRangeInserted(curSize, allContacts.size() - 1);
+        }
+    });
+    ```
 
 ## Displaying Progress with Custom Adapter
 

@@ -1,6 +1,6 @@
 ## Overview
 
-[Retrofit](http://square.github.io/retrofit/) is a type-safe REST client for Android built by Square. The library provides a powerful framework for authenticating and interacting with APIs and sending network requests with [OkHttp](http://square.github.io/okhttp/).  See [[this guide|Using-OkHttp]] to understand how OkHttp works.
+[Retrofit](http://square.github.io/retrofit/) is a type-safe REST client for Android developed by Square. The library provides a powerful framework for authenticating and interacting with APIs and sending network requests with [OkHttp](http://square.github.io/okhttp/).  See [[this guide|Using-OkHttp]] to understand how OkHttp works.
 
 This library makes downloading JSON or XML data from a web API fairly straightforward. Once the data is downloaded then it is parsed into a Plain Old Java Object (POJO) which must be defined for each "resource" in the response.
 
@@ -9,7 +9,7 @@ This library makes downloading JSON or XML data from a web API fairly straightfo
 Make sure to require Internet permissions in your `AndroidManifest.xml` file:
 
 ```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
 ```
@@ -342,7 +342,7 @@ try {
 ## RxJava
 
 Retrofit 2 also supports [[RxJava]] extensions.  You will need to create an [[RxJava]] Adapter.
-By default, all network calls by default are synchronous:
+By default, all network calls are synchronous:
 
 ```java
 RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.create();
@@ -359,7 +359,7 @@ You can then instantiate the Retrofit instance:
 ```java
 Retrofit retrofit = new Retrofit.Builder()
                                .baseUrl("https://api.github.com")
-                               .addConverterFactory(GsonConverterFactory.create());
+                               .addConverterFactory(GsonConverterFactory.create())
                                .addCallAdapterFactory(rxAdapter)
                                .build();
 ```
@@ -542,45 +542,7 @@ Retrofit retrofit = new Retrofit.Builder()
 
 ### Stetho
 
-Facebook's [Stetho](http://facebook.github.io/stetho/) project enables you to use Chrome to inspect all network traffic.
-
-<img src="http://facebook.github.io/stetho/static/images/inspector-network.png"/>
-
-Setup your `app/build.gradle` file:
-
-```gradle
-// Gradle dependency on Stetho
-  dependencies {
-    compile 'com.facebook.stetho:stetho:1.3.0'
-    compile 'com.facebook.stetho:stetho-okhttp3:1.3.0'
-  }
-```
-
-Initialize Stetho inside your Application object:
-```java
-public class MyApplication extends Application {
-  public void onCreate() {
-    super.onCreate();
-    Stetho.initializeWithDefaults(this);
-  }
-}
-```
-
-Enable network inspection.  Note that `client.networkInterceptors().add()` can no longer be used as OkHttp3 is immutable.
-
-```java
-OkHttpClient client = new OkHttpClient.Builder()
-    .addNetworkInterceptor(new StethoInterceptor())
-    .build();
-```
-
-Start your emulator or device.  Then visit `chrome://inspect` on your Chrome desktop and your emulator device should appear.  Click on `Inspect` to launch a new window.  
-
-<img src="http://facebook.github.io/stetho/static/images/inspector-discovery.png"/>
-
-Click on the `Network` tab.  Now you can start watching network traffic between your emulator or device in real-time!
-
-<img src="http://imgur.com/qlFJ0Yd.png"/>
+Facebook's [Stetho](http://facebook.github.io/stetho/) project enables you to use Chrome debugging tools to troubleshoot network traffic, database files, and view layouts. See this [[guide|Debugging-with-Stetho]] for more details.
 
 ## References
 

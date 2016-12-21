@@ -39,7 +39,9 @@ Example of LinearLayout snippet:
 </LinearLayout>
 ```
 
-If you want to setup a part of your layout, such that, for instance, 3 buttons appear in a row, occupying equal space (or if, for instance, you want to give 4/5 space to a map and 1/5 to another component below it), LinearLayout can be used to do the trick by leveraging `android:layout_weight`: 
+### Distribute Widths with Layout Weight
+
+If you want to setup a part of your layout, such that, for instance, 3 buttons appear in a row, occupying equal space (or if, for instance, you want to give 4/5 space to a map and 1/5 to another component below it), `LinearLayout` can be used to do the trick by leveraging `android:layout_weight`. This works by setting the `android:weightSum` to a total value and then setting the `android:layout_weight` value for each subview to determine width distribution. 
 
 ```xml
 ...
@@ -47,12 +49,13 @@ If you want to setup a part of your layout, such that, for instance, 3 buttons a
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:weightSum="5"
         android:layout_alignParentBottom="true">
     <ImageButton
         android:id="@+id/btnLocEnable"
         android:src="@drawable/ic_location"
         android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:background="@color/twitter_light_blue"
@@ -61,23 +64,26 @@ If you want to setup a part of your layout, such that, for instance, 3 buttons a
         android:id="@+id/btnUploadPhoto"
         android:src="@drawable/ic_addimage"
         android:layout_width="0dp"
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:background="@color/twitter_light_blue"/>
 </LinearLayout>
-...
 ```
 
-But be careful in using nestedLinearLayout and layout_weight from a layout performance point of view!
+Using the above XML, `btnLocEnable` will have 2/5 of total container width and `btnUploadPhoto` will have 3/5 of parent width because we set the total `android:weightSum` to `5` and the buttons `android:layout_weight` property to `2` and `3` respectively. 
+
+Use caution in utilizing multiple nested `LinearLayout`s and/or `layout_weight` from a performance standpoint!
 
 ## RelativeLayout
 
 In a relative layout every element arranges itself relative to other elements or a parent element. RelativeLayout positions views based on a number of directional attributes:
 
 * Position based on siblings: *layout_above*, *layout_below*, *layout_toLeftOf*, *layout_toRightOf*
-* Position based on parent: *layout_alignParentTop*, *layout_alignParentBottom*, *layout_alignParentLeft*, *layout_alignParentRight*, *android:layout_centerHorizontal*, *android:layout_centerVertical*
+* Position based on parent: *android:layout_centerHorizontal*, *android:layout_centerVertical*
 * Alignment based on siblings: *layout_alignTop*, *layout_alignBottom*, *layout_alignLeft*, *layout_alignRight*, *layout_alignBaseline*
+* Alignment based on parent: *layout_alignParentTop*, *layout_alignParentBottom*, *layout_alignParentLeft*, *layout_alignParentRight* 
+
 
 An example of a RelativeLayout:
 
@@ -199,7 +205,13 @@ The only way to fulfill this requirement is to expand the height of the second b
 
 <img src="http://imgur.com/CmMsIgp.png"/>
 
-To use, follow the [[setup guide|Design-Support-Library#adding-percent-support-library]] and make sure the Gradle dependency is included.
+To use, follow the [[setup guide|Design-Support-Library#adding-percent-support-library]] and make sure the Gradle dependency is included in `app/build.gradle` with `X.X.X` based on your support version:
+
+```gradle
+dependencies {
+  compile "com.android.support:percent:X.X.X"
+}
+```
 
 The `layout_width` and `layout_height` of the PercentRelativeLayout should determine the total width and height that can be used.  Any elements contained within it should specify the width and height possible using `layout_heightPercent` and/or `layout_widthPercent`.  Because this library is not part of the standard Android library, note that a custom attribute `app` namespace being used.
 
@@ -240,6 +252,13 @@ An example of a layout used to describe the image above is shown below (taken fr
         app:layout_heightPercent="80%" />
 </android.support.percent.PercentRelativeLayout>
 ```
+
+Further samples include:
+
+ * <https://github.com/JulienGenoud/android-percent-support-lib-sample>
+ * <https://github.com/lusfold/Android-Percent-Layout-Sample>
+ * <https://gist.github.com/vijaymakwana/e7fe04aaaa1cbaff8c6c98af1031e26a>
+ * <http://android-er.blogspot.com/2015/08/try-percentrelativelayout-and.html>
 
 #### Margin Percentages
 
@@ -326,13 +345,87 @@ Example of FrameLayout snippet:
 
 In this example, an `ImageView` is set to the full size of the `FrameLayout`.  We then draw two `TextView`'s over it.
 
+## Understanding View Layers
+
+### Layering Introduction
+
+You may notice that when two views overlap on screen, that one view will become hidden behind the other. Views are drawn in layers by default **based on the order they appear in the XML**. In other words, **the view at the bottom of a container is drawn on screen last** covering all previously drawn views.
+
+This is described in the [official view docs](https://developer.android.com/reference/android/view/View.html#Drawing) and in the [How Android Draws guide](https://developer.android.com/guide/topics/ui/how-android-draws.html) with:
+
+> The tree is largely recorded and drawn in order, with parents drawn before (i.e., behind) their children, with siblings drawn in the order they appear in the tree. If you set a background drawable for a View, then the View will draw it before calling back to its `onDraw()` method. The child drawing order can be overridden with [custom child drawing order](https://developer.android.com/reference/android/view/ViewGroup.html#setChildrenDrawingOrderEnabled(boolean)) in a ViewGroup, and with [setZ(float)](https://developer.android.com/reference/android/view/View.html#setZ(float)) custom Z values} set on Views.
+
+In other words, the easiest way to layer is to **pay close attention to the order** in which the Views are added to your XML file within their container. **Lower down in the file means higher up in the Z-axis**.
+
+### Elevation
+
+In Android starting from API level 21, items in the layout file get their Z-order **both from how they are ordered within the file** as well as from their ["elevation"](https://developer.android.com/reference/android/view/View.html#attr_android:elevation) with a higher elevation value meaning the item gets a higher Z order. The value of `android:elevation` must be a dimension value such as `10dp`. We can also use the `translationZ` property to provide the same effect. Read more [about elevation here on the official guide](https://developer.android.com/training/material/shadows-clipping.html). 
+
+### Overlapping Two Views
+
+If we want to overlap two views on top of each other, we can do so using either a `RelativeLayout` or a `FrameLayout`. Suppose we have two images: a [background image](http://i.imgur.com/PztAiKY.jpg) and a [foreground image](http://i.imgur.com/TB2gCgz.png) and we want to place them on top of one another. The code for this can be achieved with a `RelativeLayout` such as shown below:
+
+```xml
+<RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <!-- Back view should be first to be drawn first! -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/back_image_beach"
+        />
+
+    <!-- Front view should be last to be drawn on top! -->
+    <!-- Use `centerInParent` to center the image in the container -->
+    <!-- Use `elevation` to ensure placement on top (not required) -->
+    <ImageView
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:elevation="10dp"
+        android:layout_centerInParent="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/airbnb_logo_front"
+        />
+</RelativeLayout>
+```
+
+This results in the following:
+
+<img src="http://i.imgur.com/kdFda8z.png" width="400" />
+
+### Forcing View to the Front
+
+We can force a view to the front of the stack to become visible using:
+
+```java
+myView.bringToFront();
+myView.invalidate(); 
+```
+
+**Note:** You must be sure to call `bringToFront()` and `invalidate()` method on the highest-level view under your root view. See a [more detailed example here](http://stackoverflow.com/a/23669036). 
+
+With these methods outlined above, we can easily control the draw order of our views. 
+
 ## Optimizing Layout Performance
 
-To optimize layout performance, minimize the number of instantiated layouts and especially minimize deep nested layouts whenever possible. This is why you should generally use a `RelativeLayout` whenever possible instead of nested `LinearLayout`. Review the following references for more detail on optimizing your view hierarchy:
+To optimize layout performance, minimize the number of instantiated layouts and especially minimize deep nested layouts whenever possible. This is why you should generally use a `RelativeLayout` whenever possible instead of nested `LinearLayout`. A few layout tips are included below:
 
-- [Android Layout Tricks](http://android-developers.blogspot.ca/2009/02/android-layout-tricks-1.html)
+ * Using nested instances of `LinearLayout` can lead to an excessively deep view hierarchy and can be quite expensive especially expensive as each child needs to be measured twice. This is particularly important when the layout is inflated repeatedly such as in a list. 
+ * Layout performance slows down due to a nested LinearLayout and the performance can be improved by flattening the layout, making the layout shallow and wide rather than narrow and deep. A `RelativeLayout` as the root node allows for such layouts. So, when this design is converted to use `RelativeLayout`, the view hierarchy can be flattened significantly. 
+ * Sometimes your layout might require complex views that are rarely used. Whether they are item details, progress indicators, or undo messages, you can reduce memory usage and speed up rendering by [loading the views only when they are needed](https://developer.android.com/training/improving-layouts/loading-ondemand.html).
+
+Review the following references for more detail on optimizing your view hierarchy:
+
 - [Optimizing Layouts](http://developer.android.com/training/improving-layouts/optimizing-layout.html)
+- [Android Layout Tricks](http://android-developers.blogspot.ca/2009/02/android-layout-tricks-1.html)
 - [Layout Optimization](http://code.tutsplus.com/tutorials/android-sdk-tools-layout-optimization--mobile-5245)
+
+This is just the beginning. Refer to our [[profiling apps guide|Debugging-and-Profiling-Apps]] for more resources. 
 
 ## References
 

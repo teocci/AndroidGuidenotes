@@ -6,22 +6,23 @@ In this guide, we will walk you through the step by step process of getting an e
 
 ### Download Google Play Services and Google Repository
 
-First, let's download and setup the Google Play Services and Google Repository SDKs. Open `Android Studio` ⇒ `Tools` ⇒ `Android` ⇒ `Android SDK Manager`  and check whether you have already downloaded "Google Play services" and "Google Repository" or not under `SDK Tools` section. If not, select "Google Play services" and "Google Repository" to install the missing packages.
+First, let's download and setup the Google Play Services and Google Repository SDKs. Open `Android Studio` ⇒ `Tools` ⇒ `Android` ⇒ `Android SDK Manager`:
 
-<img src="https://i.imgur.com/fmepWJY.png" width="500" />
+<img src="http://imgur.com/sFNZImF.png"/>
+
+Under `SDK Tools` section, check whether you have already downloaded the latest version `Google Play services` and `Google Repository` or not. If not, select the checkboxes next to them to install or update the packages.
 
 ### Import Maps Demo
 
 1. Download the [Maps Demo Repo](https://github.com/codepath/android-google-maps-demo/archive/master.zip) 
 2. Run `File` ⇒ `Open`, select `android-google-maps-demo-master`
 3. Verify sure you have these dependencies listed in your `app/build.gradle` file:
-
-```gradle
-dependencies {
-    compile 'com.google.android.gms:play-services-maps:8.4.0'
-    compile 'com.google.android.gms:play-services-location:8.4.0'
-}
-```
+      ```gradle
+      dependencies {
+          compile 'com.google.android.gms:play-services-maps:9.8.0'
+          compile 'com.google.android.gms:play-services-location:9.8.0'
+      }
+      ```
 4. Make sure to select `Build => Clean project` and then `Build => Re-build project` to make any issues with `MapDemoActivityPermissionsDispatcher` in `MapDemoActivity.java` clear up.
 
 Next, we need to get ourselves a maps API key from Google to put into our `AndroidManifest.xml`.
@@ -40,7 +41,15 @@ Now you want to skip optional section on restricting usage and click "Create". A
 
 <img src="https://i.imgur.com/mGbpWdN.png" width="650" />
 
-Copy your API Key into the meta data for `com.google.android.maps.v2.API_KEY` within the **application node** in the `AndroidManifest.xml` for your app where you see the value `YOUR-API-KEY-HERE`:
+Copy your API Key into the `res/values/strings.xml` file for the `google_maps_api_key`:
+
+```java
+<resources>
+    <string name="google_maps_api_key">YOUR-API-KEY here</string>
+</resources>
+```
+
+The meta data for `com.google.android.maps.v2.API_KEY` within the **application node** in the `AndroidManifest.xml` for your app should reference this string resource:
 
 ```xml
 <application
@@ -51,9 +60,8 @@ Copy your API Key into the meta data for `com.google.android.maps.v2.API_KEY` wi
 
   <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
-  <meta-data
-     android:name="com.google.android.maps.v2.API_KEY"
-     android:value="YOUR-API-KEY-HERE" />
+  <meta-data android:name="com.google.android.maps.v2.API_KEY"
+android:value="@string/google_maps_api_key" />
 
 </application>
 ```
@@ -177,7 +185,14 @@ The simplest fix is described in detail within [this stack overflow post](http:/
 
 ### Simulating GPS Locations
 
-This handy [playback-gps](https://github.com/galens/playback-gpx) script allows a developer to simulate traveling a specific route on genymotion. Use this for testing and for presentations if you need to demonstrate how the map works with location in real-time.
+This handy [playback-gps](https://github.com/galens/playback-gpx) script allows a developer to simulate traveling a specific route on genymotion. Use this for testing and for presentations if you need to demonstrate how the map works with location in real-time. Additional resources related to mocking GPS locations on Android device or emulator:
+
+ * [Simulate GPS Locations with Plugin](http://www.jesusamieiro.com/android-studio-simulate-multiple-gps-points-with-mock-location-plugin/) - Using Android Studio Mock Location plugin to simulate locations. 
+ * [Lockito](https://play.google.com/store/apps/details?id=fr.dvilleneuve.lockito) - Allows you to make your phone follow a fake itinerary, with total control over the speed and GPS signal accuracy. This can be recorded using [GPS Logger](https://play.google.com/store/apps/details?id=com.mendhak.gpslogger&hl=en_GB) You can also simulate a static location.
+ * [Fake GPS location app](https://play.google.com/store/apps/details?id=com.lexa.fakegps&hl=en) - Teleport your phone to any place in the world with two clicks! This app sets up fake GPS location so every other app in your phone belives you are there!
+ * [FakeLocationProvider](https://gist.github.com/iutinvg/4671582) - Sample code for faking locations provider for Android. Useful for demoing tracking related applications.
+ * [android-gps-emulator](https://github.com/dpdearing/android-gps-emulator) - GPS location emulator for changing/setting/simulating the GPS location of the Android emulator through a simple map-based interface.
+
 
 ## References
 

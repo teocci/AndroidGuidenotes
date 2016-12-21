@@ -1,6 +1,6 @@
 ## Overview
 
-At their I/O 2015 conference, Google announced a new [design support library](http://android-developers.blogspot.com/2015/05/android-design-support-library.html), which helps bring a lot of [[material design components|Material-Design-Primer]] including a navigation drawer view, floating labels, floating action buttons, snackbars, and a new framework to tie motion and scroll events.  The library is supported for Android version 2.1 and higher. 
+At their I/O 2015 conference, Google announced a new [design support library](http://android-developers.blogspot.com/2015/05/android-design-support-library.html), which helps bring a lot of [[material design components|Material-Design-Primer]] including a navigation drawer view, floating labels, floating action buttons, snackbars, and a new framework to tie motion and scroll events.  The library is supported for Android version 2.3 and higher. 
 
 <img src="http://cdn.androidpolice.com/wp-content/uploads/2014/10/nexus2cee_67-351x625.png" width="200" />
 <a href="https://github.com/chrisbanes/cheesesquare"><img src="http://i.stack.imgur.com/Wb28n.png" width="200" /></a>
@@ -22,6 +22,8 @@ The support design library has the following key features:
 7. [[PercentRelativeLayout|Constructing-View-Layouts#percentrelativelayout]] and [PercentFrameLayout](https://developer.android.com/reference/android/support/percent/PercentFrameLayout.html) to enable views to occupy [percentage-based dimensions](http://developer.android.com/reference/android/support/percent/PercentRelativeLayout.html).  
 8. [[Vector Drawables|Drawables#vector-drawables]] to reduce the need to include images for every density size.
   * Vector drawables are compatible back to Android 2.1 (API 7), but animated vector drawables are only back-ported to Android 3.0 (API 11).
+9. [[Animating view hierarchies|View Hierarchy Animations]] using the [Transitions framework](https://developer.android.com/training/transitions/overview.html) down to Android 4.0 (API 14) .  Currently, there is no backported support for activity/fragment transitions used in this API.
+10. [[Bottom Navigation Views]] for easily switching from 3 to 5 tabbed items.
 
 ### Setup
 
@@ -29,7 +31,7 @@ Make sure that you have at least the Android Gradle plugin v2.1.0 supported.
 
 ```gradle
 dependencies {
-    classpath 'com.android.tools.build:gradle:2.1.0'
+    classpath 'com.android.tools.build:gradle:2.2.0'
 }
 ```
 
@@ -39,11 +41,11 @@ Update your root `build.gradle` file:
 
 ```gradle
 android {
-   compileSdkVersion 23  // needs to be consistent with major support libs used
+   compileSdkVersion 25  // usually needs to be consistent with major support libs used, but not necessary
 }
 
 ext {
-  supportLibVersion = '23.4.0'  // variable that can be referenced to keep support libs consistent
+  supportLibVersion = '25.0.0'  // variable that can be referenced to keep support libs consistent
 }
 ```
 
@@ -99,6 +101,16 @@ dependencies {
 
 Check out the [[vector drawables guide|Drawables#vector-drawables]] for usage details.
 
+#### Adding Transitions Library
+
+The Transitions API was first introduced in Android 4.4 (KitKat) but now includes back ported support for animating view hierarchies down to Android 4.0.   However, there is no support for activity/fragment transitions currently.  To use this library, you need to add the library explicitly:
+
+```gradle
+dependencies {
+    compile "com.android.support:transition:${supportLibVersion}"
+}
+```
+
 #### Adding Annotations Library
 
 To leverage the [annotations library](http://tools.android.com/tech-docs/support-annotations), you can also explicitly add it to your Gradle file.  Adding the [[AppCompat|Migrating-to-the-AppCompat-Library]] or support design library implicitly adds it:
@@ -147,14 +159,28 @@ The latest source code updates for the support library are now always included s
 
 - Custom views can be provided for `NavigationView` rows.  ([[view guide|Fragment-Navigation-Drawer#adding-custom-views-to-navigation-drawer]])
 
-### Changes in Support Library v23.1.1
+#### Changes in Support Library v23.1.1
 
 - NavigationView now contains a `getHeaderView()` method ([[view guide|Fragment-Navigation-Drawer#getting-references-to-the-header]])
 
-### Changes in Support Library v23.2
+#### Changes in Support Library v23.2
 
 - Added support for bottom sheets. ([[view guide|Handling-Scrolls-with-CoordinatorLayout#bottom-sheets]])
 - Added setup instructions for vector drawables. ([[view guide|Drawables#vector-drawables]])
+
+#### Changes in Support Library v24.2.0
+
+- `TextInputLayout` and `EditText` now includes the ability to add password visibility toggles.  ([[view guide |Working-with-the-EditText#adding-password-visibility-toggles]])
+
+- Added DiffUtil class for RecyclerView.  ([[view guide|Using-the-RecyclerView#diffing-larger-changes]])
+
+- Support v4 library modules have been broken apart but cannot be used to reduce APK size because the fragment library still depends on all other related modules.  ([[view guide|Migrating-to-the-AppCompat-Library#overview]])
+
+- Transitions API backported to Android 4.0 but does not include support for activity/fragment transitions. ([[view guide|View-Hierarchy-Animations]])
+
+#### Changes in Support Library v25.0.0
+
+- Bottom Navigation Views support added ([[view guide|Bottom Navigation Views]])
 
 ## References
 
@@ -168,3 +194,4 @@ The latest source code updates for the support library are now always included s
 * <https://plus.google.com/+AndroidDevelopers/posts/RZutBRWN6sH?linkId=17978076>
 * <https://medium.com/@chrisbanes/appcompat-v23-2-age-of-the-vectors-91cbafa87c88#.dvbsz7sts>
 * <https://plus.google.com/+AndroidDevelopers/posts/iTDmFiGrVne>
+* <https://www.reddit.com/r/androiddev/comments/4y70e7/android_support_library_v242_released/>

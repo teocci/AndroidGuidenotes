@@ -55,6 +55,7 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
          Uri takenPhotoUri = getPhotoFileUri(photoFileName);
          // by this point we have the camera photo on disk
          Bitmap takenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+         // RESIZE BITMAP, see section below
          // Load the taken image into a preview
          ImageView ivPreview = (ImageView) findViewById(R.id.ivPreview);
          ivPreview.setImageBitmap(takenImage);   
@@ -100,7 +101,37 @@ In certain cases, when loading a bitmap with `BitmapFactory.decodeFile(file)` de
 
 ### Resizing the Picture
 
-Photos taken with the Camera intent are often quite large. After taking a photo, you may want to consider [[resizing the Bitmap|Working-with-the-ImageView#scaling-a-bitmap]] to a more manageable size before displaying in an `ImageView`.
+Photos taken with the Camera intent are often quite large and take a very long time to load from disk. After taking a photo, you should strongly consider [[resizing the Bitmap|Working-with-the-ImageView#scaling-a-bitmap]] to a more manageable size and then **storing that smaller bitmap to disk**. We can then use that resized bitmap before displaying in an `ImageView`.
+
+Resizing a large bitmap and writing to disk can be done with:
+
+```java
+// See code above
+Uri takenPhotoUri = getPhotoFileUri(photoFileName);
+// by this point we have the camera photo on disk
+Bitmap rawTakenImage = BitmapFactory.decodeFile(takenPhotoUri.getPath());
+// See BitmapScaler.java: https://gist.github.com/nesquena/3885707fd3773c09f1bb
+Bitmap resizedBitmap = BitmapScaler.scaleToFitWidth(rawTakenImage, SOME_WIDTH);
+```
+
+Then we can write that smaller bitmap back to disk with:
+
+```java
+// Configure byte output stream
+ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+// Compress the image further
+resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 40, bytes);
+// Create a new file for the resized bitmap (`getPhotoFileUri` defined above)
+Uri resizedUri = getPhotoFileUri(photoFileName + "_resized");
+File resizedFile = new File(resizedUri.getPath());
+resizedFile.createNewFile();
+FileOutputStream fos = new FileOutputStream(resizedFile);
+// Write the bytes of the bitmap to file
+fos.write(bytes.toByteArray());
+fos.close();
+```
+
+Now, we can store the path to that resized image and load that from disk instead for much faster load times.
 
 ### Rotating the Picture
 
@@ -138,10 +169,28 @@ public Bitmap rotateBitmapOrientation(String photoFilePath) {
 
 See [this guide](http://stackoverflow.com/a/12933632/313399) for the source for this answer. Be aware that on certain devices even the EXIF data isn't set properly, in which case you should [checkout this workaround](http://stackoverflow.com/a/8864367/313399) for a fix.
 
+### Applying Filters to Images
+
+For applying filters to your captured images, check out the following libraries:
+
+ * [CameraFilter](https://github.com/nekocode/CameraFilter) - Realtime camera filters. Process frames by OpenGL shaders.
+ * [photofilter](https://github.com/mukeshsolanki/photofilter) - Apply filters to images after they are captured.
+
 ### Building a Custom Camera
 
-Instead of using the capture intent to capture photos "the easy way", a custom camera can be used within your app directly leveraging the [Camera2 API](https://developer.android.com/reference/android/hardware/camera2/package-summary.html). This custom camera is much more complicated to implement but [sample code can be found here](https://github.com/googlesamples/android-Camera2Basic). Another tutorial [can be found here](http://inducesmile.com/android/android-camera-api-tutorial/). However, there are a number of third-party libraries available to make custom camera easier:
+Instead of using the capture intent to capture photos "the easy way", a custom camera can be used within your app directly leveraging the [Camera2 API](https://developer.android.com/reference/android/hardware/camera2/package-summary.html). This custom camera is much more complicated to implement but [sample code can be found here](https://github.com/googlesamples/android-Camera2Basic) and this [CameraView](https://github.com/google/cameraview?files=1) from Google aims to help Android developers easily integrate Camera features. There is also a  [Google video overview of Camera2](https://www.youtube.com/watch?v=Xtp3tH27OFs) which explains how `Camera2` works.  
 
+There are a number of `Camera2` tutorials you can review:
+
+ * [Android Lollipop's New Camera](http://willowtreeapps.com/blog/camera2-and-you-leveraging-android-lollipops-new-camera/)
+ * [Android Camera Tutorial](http://inducesmile.com/android/android-camera-api-tutorial/).'
+ * [Android Camera2 Tutorial](http://coderzpassion.com/android-working-camera2-api/)
+ * [Android Camera2 Video Tutorial](https://www.youtube.com/watch?v=dfeencf-TpM)
+ * [Camera2 Explained](http://pierrchen.blogspot.com/2015/01/android-camera2-api-explained.html)
+
+There are also a number of third-party libraries available to make custom cameras easier:
+
+ * [MaterialCamera](https://github.com/afollestad/material-camera)
  * [CWAC-Cam2](https://github.com/commonsguy/cwac-cam2)
  * [EasyCamera](https://github.com/Glamdring/EasyCamera)
  * [SquareCamera](https://github.com/boxme/SquareCamera)
@@ -206,6 +255,53 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
 ```
 
 Note that there is a try-catch block required around the `MediaStore.Images.Media.getBitmap` line which was removed from above for brevity. Check out [this stackoverflow post](http://stackoverflow.com/questions/5309190/android-pick-images-from-gallery/5309217#5309217) for an alternate approach using mimetypes to restrict content user can select.
+
+### Selecting Multiple Images from Gallery
+
+First, from the above example, we can add the `Intent.EXTRA_ALLOW_MULTIPLE` flag to the intent:
+
+```java
+Intent intent = new Intent(Intent.ACTION_PICK);
+intent.setType("image/*");
+intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_PHOTO_CODE);
+```
+
+and then inside of `onActivityResult`, we can access all the photos selected with:
+
+```java
+@Override
+public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (data.getClipData() != null) {
+        ClipData mClipData = data.getClipData();
+         mArrayUri = new ArrayList<Uri>();
+         mBitmapsSelected = new ArrayList<Bitmap>();
+         for (int i = 0; i < mClipData.getItemCount(); i++) {
+             ClipData.Item item = mClipData.getItemAt(i);
+             Uri uri = item.getUri();
+             mArrayUri.add(uri);
+             // !! You may need to resize the image if it's too large
+             Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), photoUri);
+             mBitmapsSelected.add(bitmap);
+         }
+    }
+}
+```
+
+**Note:** that you may need to [load the selected bitmaps efficiently](https://developer.android.com/training/displaying-bitmaps/load-bitmap.html) or [[resize them|Working-with-the-ImageView#scaling-a-bitmap]] if they are large images to avoid encountering `OutOfMemoryError` exceptions. 
+
+### Custom Gallery Selector
+
+Alternatively, we can use a custom gallery selector that is implemented inside of our application to take full control over the gallery picking user experience. Check out [this custom gallery source code gist](https://gist.github.com/nesquena/55f3d8c87759f10a5343e3bb478f8858) or [older libraries wrapping this up](https://github.com/luminousman/MultipleImagePick) for reference. You can also take a look at [older tutorials on custom galleries](http://geekonjava.blogspot.com/2015/10/easy-multiple-image-pick-android.html). 
+
+### File Pickers
+
+For allowing users to pick files from their system or online services, check out these helpful filepicker libraries:
+
+ * [Android-FilePicker](https://github.com/DroidNinja/Android-FilePicker)
+ * [MaterialFilePicker](https://github.com/nbsp-team/MaterialFilePicker)
+
+These allow users to pick files beyond just images and are easy to drop into any app.
 
 ## References
 

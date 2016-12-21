@@ -171,13 +171,14 @@ Next, let's setup a basic navigation drawer based on the following layout file w
 
 Now, let's setup the drawer in our activity.  We can also setup the menu icon too.
 
-Note: Make sure you implement the correct `onPostCreate(Bundle savedInstanceState)` method. There are 2 signatures and only `onPostCreate(Bundle state)` shows the hamburger icon.
-
 ```java
 public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawer;
     private Toolbar toolbar;
     private NavigationView nvDrawer;
+ 
+    // Make sure to be using android.support.v7.app.ActionBarDrawerToggle version.
+    // The android.support.v4.app.ActionBarDrawerToggle has been deprecated.
     private ActionBarDrawerToggle drawerToggle;
 
     @Override
@@ -203,13 +204,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    // `onPostCreate` called when activity start-up is complete after `onStart()`
-    // NOTE! Make sure to override the method with only a single `Bundle` argument
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
     }
 }
 ```
@@ -379,6 +373,8 @@ We need to tie the DrawerLayout and Toolbar together:
    }
 
    private ActionBarDrawerToggle setupDrawerToggle() {
+        // NOTE: Make sure you pass in a valid toolbar reference.  ActionBarDrawToggle() does not require it
+        // and will not render the hamburger icon without it.  
         return new ActionBarDrawerToggle(this, mDrawer, toolbar, R.string.drawer_open,  R.string.drawer_close);
    }
 ```
@@ -387,7 +383,9 @@ Next, we need to make sure we synchronize the state whenever the screen is resto
 
 ```java
     // `onPostCreate` called when activity start-up is complete after `onStart()`
-    // NOTE! Make sure to override the method with only a single `Bundle` argument
+    // NOTE 1: Make sure to override the method with only a single `Bundle` argument
+    // Note 2: Make sure you implement the correct `onPostCreate(Bundle savedInstanceState)` method. 
+    // There are 2 signatures and only `onPostCreate(Bundle state)` shows the hamburger icon.
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -419,6 +417,8 @@ The ActionBarToggle will perform the same function done previously but adds a bi
 
 One thing to note is that the ActionBarDrawerToggle renders a custom [DrawerArrowDrawable](
 https://github.com/android/platform_frameworks_support/blob/master/v7/appcompat/src/android/support/v7/graphics/drawable/DrawerArrowDrawable.java) for you for the hamburger icon.
+
+Also, make sure to be using `android.support.v7.app.ActionBarDrawerToggle` version.  The `android.support.v4.app.ActionBarDrawerToggle` has been deprecated.
 
 ## Making Status Bar Translucent
 

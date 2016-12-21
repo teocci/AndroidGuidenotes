@@ -1,8 +1,29 @@
 ## Overview
 
-In Android apps, there are often settings pages that contain different options the user can tweak. The [`PreferenceFragment`](http://developer.android.com/reference/android/preference/PreferenceFragment.html) contains a hierarchy of preference objects displayed on screen in a list. These preferences will automatically save to SharedPreferences as the user interacts with them.
+In Android apps, there are often settings pages that contain different options the user can tweak. The [`PreferenceFragment`](http://developer.android.com/reference/android/preference/PreferenceFragment.html) and [`PreferenceFragmentCompat`](https://developer.android.com/reference/android/support/v7/preference/PreferenceFragmentCompat.html) contains a hierarchy of preference objects displayed on screen in a list. These preferences will automatically save to SharedPreferences as the user interacts with them.
 
-`PreferenceFragment` requires a minimum API level of 11. To support older versions, there is the [`PreferenceActivity`](http://developer.android.com/reference/android/preference/PreferenceActivity.html). However, after API level 11, many methods associated with the `PreferenceActivity` became _deprecated_. The suggested way of handling settings is through the `PreferenceFragment`.
+### What's your minimum API level?
+
+**Lollipop and below**: The suggested way of handling settings is through the `PreferenceFragment` for API 11 (Honeycomb) and above. You can avoid the original [`PreferenceActivity`](http://developer.android.com/reference/android/preference/PreferenceActivity.html), which has many _deprecated_ methods. Note, however, that the `PreferenceFragment` is **NOT** compatible with Android support v4. For alternatives:
+
+
+* [https://github.com/Machinarius/PreferenceFragment-Compat](https://github.com/Machinarius/PreferenceFragment-Compat)
+* [https://github.com/kolavar/android-support-v4-preferencefragment](https://github.com/kolavar/android-support-v4-preferencefragment)
+
+**Marshmallow and above**: The support v7 library introduced the [`PreferenceFragmentCompat`](https://developer.android.com/reference/android/support/v7/preference/PreferenceFragmentCompat.html). We'll be using this for the rest of the tutorial.
+
+### Edit your gradle dependencies
+
+Open your app's gradle file (`Your-Project/app/build.gradle`) and add the following to the dependencies:
+
+```gradle
+dependencies {
+    // your other dependencies...
+    compile 'com.takisoft.fix:preference-v7:25.0.1.0'
+}
+```
+
+Note that due to a bug with using the Material design theme and the Preference Fragment compat, an open source project is used instead. See more details on this [StackOverflow post](http://stackoverflow.com/questions/32070670/preferencefragmentcompat-requires-preferencetheme-to-be-set/32325283).
 
 ### Defining the XML
 First, define the preference object hierarchy by creating a new xml file in `res/xml`:
@@ -93,18 +114,18 @@ Preferences can also hold intents which can open a new activity or perform other
 ```
 ### Java Implementation
 
-Use [`PreferenceFragment`](http://developer.android.com/reference/android/preference/PreferenceFragment.html) to programatically handle preferences. To load the settings into the fragment, load the preferences in the `onCreate()` method. To get an instance of a preference, search for a preference using its key through the `PreferenceManager` within `onCreateView()`. You can use this instance to customize the preference, such as add a custom [OnPreferenceChangeListener](http://developer.android.com/reference/android/preference/Preference.OnPreferenceChangeListener.html).
+Use [`PreferenceFragmentCompat`](https://developer.android.com/reference/android/support/v7/preference/PreferenceFragmentCompat.html) to programatically handle preferences. To load the settings into the fragment, load the preferences in the `onCreatePreferences()` method. To get an instance of a preference, search for a preference using its key through the `PreferenceManager` within `onCreateView()`. You can use this instance to customize the preference, such as add a custom [OnPreferenceChangeListener](http://developer.android.com/reference/android/preference/Preference.OnPreferenceChangeListener.html).
 ```java
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
     
     private ListPreference mListPreference;
     
     ...
     
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.settings);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        // Indicate here the XML resource you created above that holds the preferences
+        setPreferencesFromResource(R.xml.settings, rootKey);
     }
     
     @Override
@@ -114,7 +135,7 @@ public class SettingsFragment extends PreferenceFragment {
         mListPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                // insert custom code
+                // your code here
             }
         }
         
@@ -122,13 +143,6 @@ public class SettingsFragment extends PreferenceFragment {
     }
 }
 ```
-
-Currently, Android support v4 does __not__ support `PreferenceFragment`. For alternatives, there are several open-source projects available:
-
-* [https://github.com/Machinarius/PreferenceFragment-Compat](https://github.com/Machinarius/PreferenceFragment-Compat)
-* [https://github.com/kolavar/android-support-v4-preferencefragment](https://github.com/kolavar/android-support-v4-preferencefragment)
-
-You can also follow this issue on the [Android issue tracker](https://code.google.com/p/android/issues/detail?id=58884).
 
 ### Custom Preferences
 
@@ -138,8 +152,9 @@ For a detailed guide on implementing a custom preference, refer to the [Android 
 
 ## References
 
- * <http://developer.android.com/reference/android/preference/PreferenceFragment.html>
+ * <https://developer.android.com/reference/android/support/v7/preference/PreferenceFragmentCompat.html>
  * <http://developer.android.com/guide/topics/ui/settings.html>
  * <http://www.mysamplecode.com/2011/11/android-shared-preferences-example_12.html>
  * <http://mobile.tutsplus.com/tutorials/android/android-user-interface-design-building-application-preference-screens/>
- * <http://gmariotti.blogspot.com/2013/01/preferenceactivity-preferencefragment.html>
+ * <https://storiesandroid.wordpress.com/2015/10/06/android-settings-using-preference-fragments/>
+ * <http://stackoverflow.com/questions/32070670/preferencefragmentcompat-requires-preferencetheme-to-be-set/32325283/>

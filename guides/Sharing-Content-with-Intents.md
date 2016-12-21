@@ -146,6 +146,7 @@ public Uri getLocalBitmapUri(ImageView imageView) {
         FileOutputStream out = new FileOutputStream(file);
         bmp.compress(Bitmap.CompressFormat.PNG, 90, out);
         out.close();
+        // **Warning:** This will fail for API > 24, use a FileProvider as shown below instead.
         bmpUri = Uri.fromFile(file);
     } catch (IOException e) {
         e.printStackTrace();
@@ -157,6 +158,59 @@ public Uri getLocalBitmapUri(ImageView imageView) {
 Make sure to setup the "SD Card" within the emulator device settings:
 
 <img src="https://i.imgur.com/nvA2ZKz.png" width="300" />
+
+If you are using API 24 or above, see the section below on using a `FileProvider` to work around the new file restrictions.
+
+### Sharing Files with API 24 or higher
+
+If you are using Android API 24 or higher, private File URI resources (file:///) cannot be shared.  You must wrap the File object as a content provider (content://) using the [FileProvider](https://developer.android.com/reference/android/support/v4/content/FileProvider.html) class.
+
+First, you must declare this FileProvider in your `AndroidManifest.xml` file within the `<application>` tag:
+  
+```xml
+<provider
+  android:name="android.support.v4.content.FileProvider"
+  android:authorities="com.codepath.fileprovider"
+  android:exported="false"
+  android:grantUriPermissions="true">
+    <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/fileprovider" />
+</provider>
+```
+
+Next, create a resource directory called `xml` and create a `fileprovider.xml`.  Assuming you wish to grant access to the application's specific external storage directory, which requires requesting no additional permissions, you can declare this line as follows:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path
+        name="images"
+        path="Pictures" />
+
+    <!--Uncomment below to share the entire application specific directory -->
+    <!--<external-path name="all_dirs" path="."/>-->
+</paths>
+```
+
+Finally, you will convert the File object into a content provider using the FileProvider class:
+
+```java
+// getExternalFilesDir() + "/Pictures" should match the declaration in fileprovider.xml paths
+File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");
+
+// wrap File object into a content provider
+bmpUri = FileProvider.getUriForFile(MyActivity.this, "com.codepath.fileprovider", file);
+```
+
+Note that there are other XML tags you can use in the `fileprovider.xml`, which map to the File directory specified.  In the example above, we use `Context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)`, which corresponded to the `<external-files-dir>` XML tag in the declaration with the `Pictures` path explicitly specified.  Here are other options you can use too:
+
+| XML tag                   | Corresponding storage call                |
+|---------------------------|-------------------------------------------|
+| &lt;files-path>           | Context.getFilesDir()                     |
+| &lt;cache-path>           | Context.getCacheDir()                     |
+| &lt;external-path>        | Environment.getExternalStorageDirectory() |
+| &lt;external-cache-path>  | Context.getExternalCacheDir()             |
 
 ### Sharing Remote Images (without explicit file IO)
 
@@ -175,6 +229,8 @@ return uri;
 ```
 
 You get the `Drawable` from the `ImageView`.  You get the `Bitmap` from the `Drawable`.  Put that bitmap into the Media image store.  That gives you a path which can be used instead of a file path or URL.  Note the original webpage had an additional problem with immutable bitmaps, solved by drawing the bitmap into a canvas (never shown on screen).  See linked page above for details.
+
+If you are **using API 23 or above**, then you'll need to [[request runtime permissions|Managing-Runtime-Permissions-with-PermissionsDispatcher]] for `Manifest.permission.READ_EXTERNAL_STORAGE` and `Manifest.permission.WRITE_EXTERNAL_STORAGE` in order to share the image as shown above since newer versions require explicit permisions at runtime for accessing external storage. 
 
 **Note:** There is a [common bug on emulators](https://code.google.com/p/android/issues/detail?id=75447) that will cause `MediaStore.Images.Media.insertImage` to fail with `E/MediaStore﹕ Failed to insert image` unless the media directory is first initialized as described in the link.
 
@@ -314,3 +370,4 @@ Check out the [official guide for easy sharing](http://developer.android.com/tra
 * <http://developer.android.com/training/sharing/send.html>
 * <http://developer.android.com/training/sharing/shareaction.html>
 * <http://developer.android.com/reference/android/widget/ShareActionProvider.html>
+* <https://medium.com/@benexus/dealing-with-permissions-when-sharing-files-android-m-cee9ecc287bf>

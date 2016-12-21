@@ -4,24 +4,24 @@ The [AppCompat](https://developer.android.com/tools/support-library/features.htm
 
 ```gradle
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:appcompat-v7:24.2.0'
 }
 ```
 
-Note that the AppCompat library has an implicit dependency on the support-v4 library.  The support-v4 declaration however does not necessarily need to be declared.
+Note that the AppCompat library has an implicit dependency on the support-v4 library.  The support-v4 declaration however does not necessarily need to be declared.  Since the release of the support-v4 version 24.2.0, the library has been [divided into separate modules](https://developer.android.com/topic/libraries/support-library/revisions.html): `support-compat`, `support-core-utils`, `support-core-ui`, `support-media-compat`, and `support-fragment`.  However, because the AppCompat library usually depends on `support-fragment`, which still contains a dependency to all the other modules, you currently cannot take advantage of this change to reduce the number of overall dependencies.
 
-Also notice that once you upgrade to AppCompat v7 v23, you will also be forced to update your Build Tools and `compileSDKVersion` to API 23 too.
+Also notice that once you upgrade to AppCompat v7 v24, you will also be forced to update your Build Tools and `compileSDKVersion` to API 24 too.
 
 There is a current [bug](https://code.google.com/p/android/issues/detail?id=183149) that precludes you from compiling to lower versions.   Once you are using this API version 23 or higher, be aware that the Apache HTTP Client library has been [removed](https://developer.android.com/preview/behavior-changes.html#behavior-apache-http-client). Workarounds are discussed in this [[guide|Using-Android-Async-Http-Client#resolving-android-marshmallow-compatibility-issues]].
 
-#### Using AppCompat v22 or lower
+#### Downgrading AppCompat libraries
  
-If you need to wish to downgrade from API 23, you need to follow more steps besides simply uninstalling the SDK as documented in this [bug report](https://code.google.com/p/android/issues/detail?id=183149#c7):
+If you need to wish to downgrade (i.e. API 23 to API 22), you need to follow more steps besides simply uninstalling the SDK as documented in this [bug report](https://code.google.com/p/android/issues/detail?id=183149#c7):
 
 1. Remove the Build Tools 23 from the SDK Manager.
 2. Find the appcompat-v7 SDK folder and delete the entire 23.0.0.0 folder.
@@ -83,8 +83,7 @@ Your AlertDialogs should import from the AppCompat support library instead, whic
 If you were migrating from the Holo theme, your new theme  would inherit from `Theme.AppCompat` instead of `android:Theme.Holo.Light`:
 
 ```xml
--    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
 ```
 
 If you wish to have a style that disables the ActionBar in certain Activity screens but still wish to use many of the ones you custom defined, you can inherit from `AppTheme` and apply the same styles declared in `Theme.AppCompat.NoActionBar`:
@@ -102,12 +101,11 @@ If you see `AppCompat does not support the current theme features`, it's likely 
 For your menu/ layout files, add an `app:` namespace .  For menu items, the `showAsAction` must be from the `app` namespace instead of `android` namespace.  It is considered a custom attribute of the support library and will no otherwise be processed correctly without making this change.
 
 ```xml
--<menu xmlns:android="http://schemas.android.com/apk/res/android">
-+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
  <item android:id="@+id/myMenuItem"
        android:title="@string/select"
--      android:showAsAction="ifRoom"
-+      app:showAsAction="ifRoom"
+       android:showAsAction="ifRoom"
+       app:showAsAction="ifRoom"
 ```
 
 If you are using widgets such as the SearchView, you must also use `android.support.v7.widget.SearchView` instead of `android.widget.SearchView`.  Note that the `app` namespace must also be used.
@@ -118,10 +116,8 @@ If you are using widgets such as the SearchView, you must also use `android.supp
      <item android:id="@+id/contentSearch"
            android:orderInCategory="2"
            android:title="@string/search"
--          android:showAsAction="ifRoom"
--          android:actionViewClass="android.widget.SearchView">
-+          app:showAsAction="ifRoom"
-+          app:actionViewClass="android.support.v7.widget.SearchView">
+           app:showAsAction="ifRoom"
+           app:actionViewClass="android.support.v7.widget.SearchView">
 ```
 
 #### Changes to Menu Options
@@ -141,7 +137,7 @@ In addition, setting the `targetSdkVersion` to the latest SDK version ensures th
 
 ```gradle
 android {
-    targetSdkVersion 23
+    targetSdkVersion 24
 ```
 
 ### Known issues

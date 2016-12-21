@@ -127,7 +127,7 @@ public class BoxOfficeMovieResponse {
 
 ### Custom options
 
-The [Gson Builder](https://google-gson.googlecode.com/svn/trunk/gson/docs/javadocs/com/google/gson/GsonBuilder.html) class enables a variety of different options that help provide more flexibility for the JSON parsing.  Before we instantiate a Gson parser, it's important to know what options are available using the Builder class.  
+The [Gson Builder](https://github.com/google/gson/blob/master/gson/src/main/java/com/google/gson/GsonBuilder.java) class enables a variety of different options that help provide more flexibility for the JSON parsing.  Before we instantiate a Gson parser, it's important to know what options are available using the Builder class.  
 
 ```java
 GsonBuilder gsonBuilder = new GsonBuilder();
@@ -345,7 +345,7 @@ Retrofit uses [OkHttp](http://square.github.io/okhttp/) for the underlying netwo
 ```java
  public interface RottenTomatoesService {
         @GET("/lists/movies/box_office.json")
-        public Call<BoxOfficeMovieResponse> listRepos();
+        public Call<BoxOfficeMovieResponse> listMovies();
     }
 ```
 
@@ -380,7 +380,7 @@ We then simply need to create a service class that will enable us to make API ca
 ```java
 RottenTomatoesService service = retrofit.create(RottenTomatoesService.class);
 
-Call<BoxOfficeMovieResponse> call = service.listRepos();
+Call<BoxOfficeMovieResponse> call = service.listMovies();
 call.enqueue(new Callback<BoxOfficeMovieResponse>() {
             @Override
             public void onResponse(Call<BoxOfficeMovieresponse> call, Response response) {

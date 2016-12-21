@@ -176,7 +176,21 @@ This results in:
 
 ![](http://i.imgur.com/PEl2EKl.png)
 
-Note that all tags are not supported. See [this article](http://javatechig.com/android/display-html-in-android-textview) for a more detailed look at supported tags and usages. If you want to store your HTML text within `res/values/strings.xml`, you have to use CDATA to escape such as:
+Note that all tags are not supported. See [this article](http://javatechig.com/android/display-html-in-android-textview) for a more detailed look at supported tags and usages. 
+
+### Setting Font Colors
+
+For setting font colors, we can use the `<font>` tag as shown:
+
+```java
+Html.fromHtml("Nice! <font color='#c5c5c5'>This text has a color</font>. This doesn't"); 
+```
+
+And you should be all set. 
+
+### Storing Long HTML Strings
+
+If you want to store your HTML text within `res/values/strings.xml`, you have to use CDATA to escape such as:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -188,7 +202,7 @@ Note that all tags are not supported. See [this article](http://javatechig.com/a
 </string>
 ```
 
-and access the content with `getString(R.string.htmlFormattedText)` to load this within the TextView.
+and access the content with `getString(R.string.htmlFormattedText)` to load this within the TextView. 
 
 For more advanced cases, you can also check out the [html-textview](https://github.com/dschuermann/html-textview) library which adds support for almost any HTML tag within this third-party TextView.
 
@@ -215,6 +229,45 @@ This results in:
 One known issue when using `android:autoLink` or the `Linkify` class is that it may break the ability to respond to events on the ListView through `setOnItemClickListener`.  Check out [this solution](http://www.michaelevans.org/blog/2013/03/29/clickable-links-in-android-listviews/) which extends `TextView` in order to modify the `onTouchEvent` to correctly propagate the click.   You basically need to create a `LinkifiedTextView` and use this special View in place of any of your TextView's that need auto-link detection.
 
 In addition, review [this stackoverflow post](http://stackoverflow.com/questions/26980204/listview-with-textview-autolink-not-receiving-onitemclicklistener) or [this android issue](https://code.google.com/p/android/issues/detail?id=3414) for additional context.
+
+## Displaying Images within a TextView
+
+A TextView is actually surprisingly powerful and actually supports having images displayed as a part of it's content area. Any images stored in the "drawable" folders can actually be embedded within a TextView at several key locations in relation to the text using the [android:drawableRight](http://developer.android.com/reference/android/widget/TextView.html#attr_android:drawableRight) and the `android:drawablePadding` property. For example:
+
+```xml
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"     
+    android:gravity="center"
+    android:text="@string/my_contacts"
+    android:drawableRight="@drawable/ic_action_add_group"
+    android:drawablePadding="8dp"
+/>
+```
+
+Which results in:
+
+![Contacts View](https://i.imgur.com/LoN8jpH.png)
+
+In Android, many views inherit from `TextView` such as `Button`s, `EditText`s, `RadioButton`s which means that all of these views support the same functionality. For example, we can also do:
+
+```xml
+<EditText
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="@string/user_name"
+    android:drawableLeft="@drawable/ic_action_person"
+    android:drawablePadding="8dp"
+/>
+```
+
+Which results in:
+
+![EditText with drawable](https://i.imgur.com/GZiIf1C.png)
+
+The relevant attributes here are `drawableLeft`, `drawableRight`, `drawableTop` and `drawableBottom` along with `drawablePadding`. Check out [this TextView article](http://antonioleiva.com/textview_power_drawables/) for a more detailed look at how to use this functionality. 
+
+Note that if you want to be able to better control the size or scale of the drawables, check out [this handy TextView extension](http://stackoverflow.com/a/31916731/313399) or [this bitmap drawable approach](http://stackoverflow.com/a/29804171/313399). You can also make calls to [setCompoundDrawablesWithIntrinsicBounds](https://groups.google.com/forum/#!topic/android-developers/_Gzbe0KCP_0) on the `TextView`.
 
 ## Using Custom Fonts
 
@@ -318,44 +371,31 @@ tvHelloWorld.setText(ssb, TextView.BufferType.EDITABLE);
 
 Note: There are 3 different classes that can be used to represent text that has markup attached. [SpannableStringBuilder](http://developer.android.com/reference/android/text/SpannableStringBuilder.html) (used above) is the one to use when dealing with mutable spans and mutable text. [SpannableString](http://developer.android.com/reference/android/text/SpannableString.html) is for mutable spans, but immutable text. And [SpannedString](http://developer.android.com/reference/android/text/SpannedString.html) is for immutable spans and immutable text.
 
-## Displaying Images within a TextView
+### Creating Clickable Styled Spans
 
-A TextView is actually surprisingly powerful and actually supports having images displayed as a part of it's content area. Any images stored in the "drawable" folders can actually be embedded within a TextView at several key locations in relation to the text using the [android:drawableRight](http://developer.android.com/reference/android/widget/TextView.html#attr_android:drawableRight) and the `android:drawablePadding` property. For example:
+In certain cases, we might want different substrings in a `TextView` to different styles and then clickable to trigger an action. For example, rendering tweet items where `@foo` can be clicked in a message to view a user's profile. For this, you should copy over the [PatternEditableBuilder.java](https://gist.github.com/nesquena/f2504c642c5de47b371278ee61c75124#file-patterneditablebuilder-java) utility into your app. You can then use this utility to make clickable spans. For example:
 
-```xml
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"     
-    android:gravity="center"
-    android:text="@string/my_contacts"
-    android:drawableRight="@drawable/ic_action_add_group"
-    android:drawablePadding="8dp"
-/>
+```java
+// Set text within a `TextView`
+TextView textView = (TextView) findViewById(R.id.textView);
+textView.setText("Hey @sarah, where did @jim go? #lost");
+// Style clickable spans based on pattern
+new PatternEditableBuilder().
+    addPattern(Pattern.compile("\\@(\\w+)"), Color.BLUE,
+       new PatternEditableBuilder.SpannableClickedListener() {
+            @Override
+            public void onSpanClicked(String text) {
+                Toast.makeText(MainActivity.this, "Clicked username: " + text,
+                    Toast.LENGTH_SHORT).show();
+            }
+       }).into(textView);
 ```
 
-Which results in:
+and this results in the following:
 
-![Contacts View](https://i.imgur.com/LoN8jpH.png)
+<img src="http://i.imgur.com/OHFMMTc.gif" width="500" />
 
-In Android, many views inherit from `TextView` such as `Button`s, `EditText`s, `RadioButton`s which means that all of these views support the same functionality. For example, we can also do:
-
-```xml
-<EditText
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="@string/user_name"
-    android:drawableLeft="@drawable/ic_action_person"
-    android:drawablePadding="8dp"
-/>
-```
-
-Which results in:
-
-![EditText with drawable](https://i.imgur.com/GZiIf1C.png)
-
-The relevant attributes here are `drawableLeft`, `drawableRight`, `drawableTop` and `drawableBottom` along with `drawablePadding`. Check out [this TextView article](http://antonioleiva.com/textview_power_drawables/) for a more detailed look at how to use this functionality. 
-
-Note that if you want to be able to better control the size or scale of the drawables, check out [this handy TextView extension](http://stackoverflow.com/a/31916731/313399) or [this bitmap drawable approach](http://stackoverflow.com/a/29804171/313399). You can also make calls to [setCompoundDrawablesWithIntrinsicBounds](https://groups.google.com/forum/#!topic/android-developers/_Gzbe0KCP_0) on the `TextView`
+For more details, [view the README](https://gist.github.com/nesquena/f2504c642c5de47b371278ee61c75124#file-readme-md) for more usage examples. 
 
 ## References
 

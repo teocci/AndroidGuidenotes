@@ -7,15 +7,15 @@ This guide will show you how to configure an Android app to send and receive pus
 
 ## Parse Push
 
-First approach is to use the Parse Push service to send and receive push notifications. Start by checking out our [configuring parse server guide](https://guides.codepath.com/android/Configuring-a-Parse-Server#enabling-push-notifications) to get things started.  
+First approach is to use the Parse Push service to send and receive push notifications.  You will first need to setup a Parse server by following our [configuring parse server guide](https://guides.codepath.com/android/Configuring-a-Parse-Server) to get things started.   
 
 ### Setup
 
-Check out [this official tutorial](https://parse.com/tutorials/android-push-notifications) for a step-by-step guide to setting up push notifications with Parse. You can also review this [Parse Setup Guide](https://parse.com/apps/quickstart#parse_push/android/native) for full instructions. Start by checking out our [configuring parse server guide](https://guides.codepath.com/android/Configuring-a-Parse-Server#enabling-push-notifications) to get things started.  Use the [push notifications client demo](https://github.com/codepath/ParsePushNotificationExample) as a reference as well.
+Start by checking out our [push notifications setup guide for Parse](https://guides.codepath.com/android/Push-Notifications-Setup-for-Parse) to get things started.  Use the [push notifications client demo](https://github.com/codepath/ParsePushNotificationExample) as a reference as well.
 
 ### Sending Push Notifications
 
-Because of the implicit security issues with allowing push notifications to be sent through Android or iOS directly to other devices, this feature is disabled.  For open source Parse, you must implement pre-defined code written in JavaScript that can be called by the clients to execute, otherwise known as Parse Cloud.
+Because of the implicit [security issues](https://github.com/ParsePlatform/parse-server/issues/396#issuecomment-183792657) with allowing push notifications to be sent through Android or iOS directly to other devices, this feature is disabled.  Normally in hosted Parse you can toggle an option to override this security restriction.  For open source Parse, you must implement pre-defined code written in JavaScript that can be called by the clients to execute, otherwise known as [Parse Cloud]( http://blog.parse.com/announcements/pushing-from-the-javascript-sdk-and-cloud-code/).
 
 Your Java client should call this function:
 

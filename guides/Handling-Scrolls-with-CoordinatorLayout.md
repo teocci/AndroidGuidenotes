@@ -106,7 +106,7 @@ Next, we must make the Toolbar responsive to scroll events using a container lay
  </android.support.design.widget.AppBarLayout>
 ```
 
-**Note**: AppBarLayout currently expects to be the first child nested within a CoordinatorLayout according to the official [Google docs] (http://developer.android.com/reference/android/support/design/widget/AppBarLayout.html).
+**Note**: AppBarLayout currently expects to be the direct child nested within a CoordinatorLayout according to the official [Google docs] (http://developer.android.com/reference/android/support/design/widget/AppBarLayout.html).
 
 Next, we need to define an association between the AppBarLayout and the View that will be scrolled.  Add an `app:layout_behavior` to a RecyclerView or any other View capable of nested scrolling such as [NestedScrollView](http://stackoverflow.com/questions/25136481/what-are-the-new-nested-scrolling-apis-for-android-l).  The support library contains a special string resource `@string/appbar_scrolling_view_behavior` that maps to [AppBarLayout.ScrollingViewBehavior](https://developer.android.com/reference/android/support/design/widget/AppBarLayout.ScrollingViewBehavior.html), which is used to notify the `AppBarLayout` when scroll events occur on this particular view.  The behavior must be established on the view that triggers the event.
 
@@ -178,7 +178,12 @@ At this point, you should notice that the Toolbar responds to scroll events.
 If we want to create the collapsing toolbar effect, we must wrap the Toolbar inside CollapsingToolbarLayout:
 
 ```xml
-<android.support.design.widget.CollapsingToolbarLayout
+<android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+    <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -193,8 +198,9 @@ If we want to create the collapsing toolbar effect, we must wrap the Toolbar ins
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_scrollFlags="scroll|enterAlways"></android.support.v7.widget.Toolbar>
-
-</android.support.design.widget.CollapsingToolbarLayout>
+ 
+    </android.support.design.widget.CollapsingToolbarLayout>
+</android.support.design.widget.AppBarLayout>
 ```
 
 Your result should now appears as:
@@ -412,14 +418,44 @@ You can set a layout attribute `app:behavior_hideable=true` to allow the user to
 
 Modal sheets are basically Dialog Fragments that slide from the bottom.  See [[this guide|Using-DialogFragment]] about how to create these types of fragments.  Instead of extending from `DialogFragment`, you would extend from `BottomSheetDialogFragment`.
 
+### Advanced Bottom Sheet Examples
+
+There are many examples in the wild of complex bottom sheets with a floating action button that grows or shrinks or sheet state transitions as the user scrolls. The most well-known example is Google Maps which has a multi-phase sheet:
+
+<img src="http://i.imgur.com/lLSdNus.gif" width="250" />
+
+The following tutorials and sample code should help achieve these more sophisticated effects:
+
+ * [CustomBottomSheetBehavior Sample](https://github.com/miguelhincapie/CustomBottomSheetBehavior) - Demonstrates three-state phase shifts during scrolling of the bottom sheet. Refer to [related stackoverflow post](http://stackoverflow.com/a/37443680) for explanation.  
+ * [Grafixartist Bottom Sheet Tutorial](http://blog.grafixartist.com/bottom-sheet-android-design-support-library/) - Tutorial on how to position and animate the floating action button as the bottom sheet scrolls.
+ * You can read this [stackoverflow post](http://stackoverflow.com/questions/34160423/how-to-mimic-google-maps-bottom-sheet-3-phases-behavior) for additional discussion on how to mimic google maps state changes during scroll. 
+
+Getting the desired effect can take quite a bit of experimentation. For certain use-cases, you might find that the third-party libraries listed below provide easier alternatives. 
+
+### Third-party Bottom Sheet Alternatives
+
+In addition to the official bottom sheet within the design support library, there are several extremely popular third-party alternatives that can be easier to use and configure for certain use cases:
+
+<img src="http://i.imgur.com/xRv4IQH.gif" width="250" />
+
+The following represent the most common alternatives and related samples:
+
+* [AndroidSlidingUpPanel](https://github.com/umano/AndroidSlidingUpPanel) - A widely popular third-party approach to a bottom sheet that should be considered as an alternative to the official approach. 
+* [Flipboard/bottomsheet](https://github.com/Flipboard/bottomsheet) - Another very popular alternative to the official bottom sheet that was widely in use before the official solution was released. 
+* [ThreePhasesBottomSheet](https://github.com/AndroidDeveloperLB/ThreePhasesBottomSheet) - Sample code leveraging third-party libraries to create a multi-phase bottom sheet. 
+* [Foursquare BottomSheet Tutorial](http://android.amberfog.com/?p=915) - Outlines how to use third-party bottom sheets to achieve the effect used within an older version of Foursquare. 
+
+Between the official persistent modal sheets and these third-party alternatives, you should be able to achieve any desired effect with sufficient experimentation. 
+
 ## Troubleshooting Coordinated Layouts
 
 `CoordinatorLayout` is very powerful but error-prone at first. If you are running into issues with coordinating behavior, check the following tips below:
 
  * The best example of how to use coordinator layout effectively is to refer carefully to the [source code for cheesesquare](https://github.com/chrisbanes/cheesesquare). This repository is a sample repo kept updated by Google to reflect best practices with coordinating behaviors. In particular, see the [layout for a tabbed ViewPager list](https://github.com/chrisbanes/cheesesquare/blob/master/app/src/main/res/layout/include_list_viewpager.xml) and [this for a layout for a detail view](https://github.com/chrisbanes/cheesesquare/blob/master/app/src/main/res/layout/activity_detail.xml). Compare your code carefully to the cheesesquare source code.
+ * Make sure that the `app:layout_behavior="@string/appbar_scrolling_view_behavior"` property is applied to the **direct child of the `CoordinatorLayout`**. For example, if there's pull-to-refresh that the property is applied to the `SwipeRefreshLayout` that contains the `RecyclerView` rather than the 2nd-level descendant. 
  * When coordinating between a fragment with a list of items inside of a `ViewPager` and a parent activity, you want to put the `app:layout_behavior` property on the `ViewPager` [as outlined here](https://github.com/chrisbanes/cheesesquare/blob/master/app/src/main/res/layout/include_list_viewpager.xml#L49) so the scrolls within the pager are bubbled up and can be managed by the `CoordinatorLayout`. Note that you **should not** put that `app:layout_behavior` property anywhere within the fragment or the list within. 
  * Keep in mind that `ScrollView` **does not work** with `CoordinatorLayout`. You will need to use the `NestedScrollView` instead as shown in [this example](https://github.com/chrisbanes/cheesesquare/blob/master/app/src/main/res/layout/activity_detail.xml#L61). Wrapping your content in the `NestedScrollView` and applying the `app:layout_behavior` property will cause the scrolling behavior to work as expected.
- * Make sure that the root layout is a CoordinatorLayout. Scrolls will not react to any other layout.
+ * Make sure that the root layout of your activity or fragment is a `CoordinatorLayout`. Scrolls will not react to any of the other layouts.
 
 There's a lot of ways coordinating layouts can go wrong. Add tips here as you discover them.
 
@@ -446,7 +482,7 @@ To define your own a CoordinatorLayout Behavior, the layoutDependsOn() and onDep
    }       
 ```
 
-The best way to understand how to implement these custom behaviors is by studying the AppBarLayout.Behavior and FloatingActionButtion.Behavior examples.  Although the source code is not publicly available yet, you can use the decompiler integrated with Android Studio 1.2 to examine how they work by navigating up the source tree.
+The best way to understand how to implement these custom behaviors is by studying the [AppBarLayout.Behavior](https://github.com/android/platform_frameworks_support/blob/master/design/src/android/support/design/widget/AppBarLayout.java#L738) and [FloatingActionButtion.Behavior](https://android.googlesource.com/platform/frameworks/support/+/master/design/src/android/support/design/widget/FloatingActionButton.java#L554) examples. 
 
 ## Third-Party Scrolling and Parallax
 

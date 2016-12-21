@@ -94,13 +94,23 @@ First, let's download and setup the Google Play Services SDK. Open `Tools`->`And
 
 ![](https://i.imgur.com/VYM0m59.png)
 
-### Import Google Play Services
+### Add Google Repository
+
+Also open `Tools`->`Android`->`SDK Manager` and click on the `SDK Tools` tab.  Make sure that under `Support Repository` you have installed the `Google Repository`.  If you forget this step, you are not likely to be able to include the Firebase messaging library in the next step.
+
+<img src="http://imgur.com/QBvyEAH.png"/>
+
+### Update to SDK Tools
+
+Also make sure to upgrade to SDK Tools 25.2.2.  You may have Firebase authentication issues with lower SDK Tools version.
+
+### Import Firebase Messaging Library
 
 Add the following to your Gradle file:
 
 ```gradle
 dependencies {
-   compile 'com.google.firebase:firebase-messaging:9.0.0'
+   compile 'com.google.firebase:firebase-messaging:9.4.0'
 }
 ```
 
@@ -108,7 +118,7 @@ dependencies {
 
 You will want to implement an [[Intent Service|Starting-Background-Services#creating-an-intentservice]], which will execute as a background thread instead of being tied to the lifecycle of an Activity.   In this way, you can ensure that push notifications can be received by your app if a user navigates away from the activity while this registration process is occuring.
 
-First, you will need to create a `RegistrationIntentService` class and make sure it is declared in your `AndroidManifest.xml` file:
+First, you will need to create a `RegistrationIntentService` class and make sure it is declared in your `AndroidManifest.xml` file and within the `application` tag:
 
 ```java
 <service android:name=".RegistrationIntentService" android:exported="false"/>
@@ -225,7 +235,7 @@ public class MyActivity extends AppCompatActivity {
 According to this Google official [documentation](https://developers.google.com/instance-id/guides/android-implementation), the instance ID server issues callbacks periodically (i.e. 6 months) to request apps to refresh their tokens.  To support this possibility, we need to extend from `InstanceIDListenerService` to handle token refresh changes.  We should create a file called `MyInstanceIDListenerService.java` that will override this base method and launch an intent service for `RegistrationIntentService` to fetch the token:
 
 ```java
-public class MyInstanceIDListenerService extends InstanceIDListenerService {
+public class MyInstanceIDListenerService extends FirebaseInstanceIdService {
 
     @Override
     public void onTokenRefresh() {
@@ -236,7 +246,7 @@ public class MyInstanceIDListenerService extends InstanceIDListenerService {
 }
 ```
 
-You also need to add the service to your `AndroidManifest.xml` file:
+You also need to add the service to your `AndroidManifest.xml` file within the `application` tag:
 
 ```xml
 <service
@@ -529,6 +539,10 @@ curl -s "https://gcm-http.googleapis.com/GCM/send" -H "Authorization: key=[AUTHO
 ## Rate Limits
 
 FCM is free to use.  In Jan. 2015, Google announced new rate limits in this [blog post](https://plus.google.com/+AndroidDevelopers/posts/Kc2whqR66zt) for FCM.  There is a per minute / per device limit that can be sent.  More technical details are included in this Stack Overflow [posting](http://stackoverflow.com/questions/26790810/rate-limit-exceeded-error-when-using-google-cloud-messaging-api/26790811#26790811).
+
+## Quickstart sample
+
+Take a look at Google's [quickstart sample](https://github.com/firebase/quickstart-android/tree/master/messaging) to test out FCM.
 
 ## References
 

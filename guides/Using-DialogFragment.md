@@ -185,8 +185,7 @@ public class EditNameDialogFragment extends DialogFragment implements OnEditorAc
 	
     // ...
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-        Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         // ...
         // 2. Setup a callback when the "Done" button is pressed on keyboard
         mEditText.setOnEditorActionListener(this);
@@ -273,6 +272,15 @@ public class MyParentFragment extends Fragment implements EditNameDialogListener
 }
 ```
 
+**Troubleshooting**
+
+If you are having any issues, be sure to use the checklist below:
+
+ * In parent fragment, before calling `dialogFragment.show()`, are you calling `setTargetFragment` and passing in the correct fragment as the target?
+ * In the dialog fragment, before calling `dismiss()`, are you calling `listener.someCallbackMethod()` on a listener casted from the `getTargetFragment()` passed in above? 
+ * Have you correctly implemented the interface and callback method fired i.e `listener.someCallbackMethod()` inside of the parent fragment?
+ * Try breakpointing each of those lines to make sure the target fragment is set property and the callback method is being executed. 
+
 With that, the two fragments are able to pass data back and forth. 
 
 ## Styling Dialogs
@@ -321,6 +329,19 @@ Styling a DialogFragment with a custom layout works just the [[same as styling a
     <item name="android:textColorHighlight">@color/light_blue</item>
 </style>
 ```
+
+#### Dialog Styling Workaround
+
+**Note:** There is currently a bug in the support library that **causes styles not to show up properly**. Changing the `DialogFragment` in the `onCreateView` to use the activity's inflater seems to resolve the issue:
+
+```java
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+        return getActivity().getLayoutInflater().inflate(R.layout.fragment_edit_name, container);
+    }
+```
+All dialog widgets should now be properly themed. Check out this [stackoverflow post](http://stackoverflow.com/a/32791569) for details.
 
 ### Styling Titlebar of Dialog
 
@@ -570,6 +591,9 @@ The native date and time pickers for Android are another example of specialized 
 If you wish for the containing activity to receive the date or time selected by the dialog, you should ensure that the Activity implements the respective interface. If we want the date picker to be shown from within another dialog fragment, refer to [[setting a target fragment|Using-DialogFragment#passing-data-to-parent-fragment]]. For instance, for a date picker fragment, you will want to ensure that the activity implements the `OnDateSetListener` interface:
 
 ```java
+
+import java.util.Calendar;  // do not import java.icu.utils.Calendar
+
 public class DatePickerFragment extends DialogFragment {
 
     @Override

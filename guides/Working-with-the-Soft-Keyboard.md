@@ -82,7 +82,7 @@ The options for the mode include two aspects: visibility of the keyboard and adj
 
 ### Changing UI Reaction
 
-The virtual keyboard reduces the amount of space available for your app's UI. We can also use this same `android:windowSoftInputMode` property within the `<activity>` note to change the way that the soft keyboard displaces the view elements when appearing within the `AndroidManifest.xml` file:
+The virtual keyboard reduces the amount of space available for your app's UI. We can also use this same `android:windowSoftInputMode` property within the `<activity>` node to change the way that the soft keyboard displays the view elements when appearing within the `AndroidManifest.xml` file:
 
 ```xml
 <!-- Configures the UI to be resized to make room for the keyboard -->
@@ -102,6 +102,12 @@ http://developer.android.com/guide/topics/manifest/activity-element.html#wsoft).
 ```
 
 See the guide on [keyboard visibility](http://developer.android.com/training/keyboard-input/visibility.html) for more details.
+
+## Troubleshooting
+
+### Toolbar Height Expands on UI Resize
+
+To avoid incorrect `Toolbar` height calculations, you can add `android:fitsSystemWindows="true"` ([learn more](https://medium.com/google-developers/why-would-i-want-to-fitssystemwindows-4e26d9ce1eec)) to the parent layout of the `Toolbar`. In many cases, this should resolve the issue.  
 
 ## References
 

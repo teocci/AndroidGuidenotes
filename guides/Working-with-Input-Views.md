@@ -3,15 +3,15 @@
 Android has support for many different input controls for accepting input from the user. The common input controls include:
 
  * [Buttons](http://developer.android.com/guide/topics/ui/controls/button.html)
- * [Text Fields](http://developer.android.com/guide/topics/ui/controls/text.html)
- * [Checkboxes](http://developer.android.com/guide/topics/ui/controls/checkbox.html)
- * [Radio Buttons](http://developer.android.com/guide/topics/ui/controls/radiobutton.html)
- * [Spinners](http://developer.android.com/guide/topics/ui/controls/spinner.html)
+ * [[Text Fields|Working-With-Input-Views#text-fields]]
+ * [[Checkboxes|Working-With-Input-Views#checkboxes]]
+ * [[Radio Buttons|Working-With-Input-Views#radio-buttons]]
+ * [[Spinners|Working-With-Input-Views#spinners]]
  * [SeekBar](http://developer.android.com/reference/android/widget/SeekBar.html)
  * [RatingBar](http://developer.android.com/reference/android/widget/RatingBar.html)
- * [NumberPicker](http://developer.android.com/reference/android/widget/NumberPicker.html)
+ * [[NumberPicker|Working-With-Input-Views#numberpicker]]
  * [Switch](http://developer.android.com/reference/android/widget/Switch.html)
- * [Date and Time Pickers](http://developer.android.com/guide/topics/ui/controls/pickers.html)
+ * [[Date and Time Pickers|Working-With-Input-Views#date-and-time-pickers]]
 
 Adding an input control to your UI is as simple as adding an XML element with attributes to your layout file:
 
@@ -55,6 +55,11 @@ If you intend to support older Android devices, the better options for date and 
  * [DateTimePicker](https://github.com/flavienlaurent/datetimepicker) - Contains the beautiful DatePicker and TimePicker that can be seen in the new Google Agenda app (supports Android 2.1+ devices)
  * [MaterialDateTimePicker](https://github.com/wdullaer/MaterialDateTimePicker) - Material Design styled DatePicker and TimePicker (supports Android 4.0+ devices)
 
+For large dedicated date pickers used for scheduling, check out these:
+
+ * [TimesSquare](https://github.com/square/android-times-square) - If you want a full-screen date picker, check out this widely popular library. 
+ * [Material-CalendarView](https://github.com/prolificinteractive/material-calendarview) - A Material design back port of Android's CalendarView. 
+
 DateTimerPicker and MaterialDateTimePicker are both forks from the original Android open source datetime picker located [here](https://android.googlesource.com/platform/frameworks/opt/datetimepicker/).  MaterialDateTimePicker however does not use the Support Fragment Manager for reasons stated [here](https://github.com/wdullaer/MaterialDateTimePicker#why-not-use-supportdialogfragment), so if you need it in your project, you will need to download the original source, create a separate project, and modify the [import statements](https://android.googlesource.com/platform/frameworks/opt/datetimepicker/+/master/src/com/android/datetimepicker/date/DatePickerDialog.java#21).
 
 
@@ -92,7 +97,7 @@ checkCheese.setChecked(true);
 and in our activity, we can manage checkboxes using a checked listener with `OnCheckedChangeListener` as show below:
 
 ```java
-// Fires every time a checkbox is checked or unchecked
+// Defines a listener for every time a checkbox is checked or unchecked
 CompoundButton.OnCheckedChangeListener checkListener = new CompoundButton.OnCheckedChangeListener() {
     @Override
     public void onCheckedChanged(CompoundButton view, boolean checked) {
@@ -118,6 +123,8 @@ CompoundButton.OnCheckedChangeListener checkListener = new CompoundButton.OnChec
     }
 };
 
+// This actually applies the listener to the checkboxes 
+// by calling `setOnCheckedChangeListener` on each one
 public void setupCheckboxes() {
     Checkbox checkCheese = (Checkbox) findViewById(R.id.checkbox_cheese);
     Checkbox checkMeat = (Checkbox) findViewById(R.id.checkbox_meat);
@@ -203,7 +210,37 @@ and then specify the string array of options in `res/values/planets_array.xml`:
 </resources>
 ```
 
-Check out the [Spinners](http://developer.android.com/guide/topics/ui/controls/spinner.html) guide for more details. Note that customizing a spinner's text requires using a [custom array adapter and layout file](http://stackoverflow.com/questions/9476665/how-to-change-spinner-text-size-and-text-color).
+#### Customizing Spinner Items
+
+Changing text size on the `<Spinner>` tag has no effect on the actual dropdown items.   To change their styles, you need to create a custom array adapter and layout file.  First, you should create a `spinner_item1.xml`
+
+```xml
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style:"@style/spinner_dropdown_style1"
+    android:textColor="#ff0000" />
+```
+
+Define your style to inherit from `Widget.AppCompat.DropDownItem.Spinner` so that it will inherit the correct spacing for dropdown items.  Otherwise, you may notice the dropdown items are too closely spaced or not enough margin to the left-hand side:
+
+```xml
+<style name="spinner_dropdown_style_theme1" parent="Widget.AppCompat.DropDownItem.Spinner">
+     <item name="android:textColor">@android:color/white</item>
+     <item name="android:background">#507B91</item>
+</style>
+```
+
+You then bind the string array of items to the layout:
+
+```java
+ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, R.layout.spinner_item);
+spinner.setAdapter(adapter);
+```
+
+See [this link](http://www.broculos.net/2013/09/how-to-change-spinner-text-size-color.html) for more details.
+Check out the [Spinners](http://developer.android.com/guide/topics/ui/controls/spinner.html) guide for more details. 
 
 #### Getting and Setting Values
 
@@ -237,9 +274,9 @@ You can also load a spinner using an adapter for a dynamic source of options usi
 Spinner spinner = (Spinner) findViewById(R.id.spinner);
 // Create an ArrayAdapter using the string array and a default spinner layout
 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-        R.array.planets_array, android.R.layout.simple_spinner_item);
+        R.array.planets_array, android.R.layout.simple_spinner_dropdown_item);
 // Specify the layout to use when the list of choices appears
-adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+adapter.setDropDownViewResource(android.R.layout.simple_spinner_custom_layout);
 // Apply the adapter to the spinner
 spinner.setAdapter(adapter);
 ```
@@ -306,3 +343,14 @@ You can also call `getValue` to retrieve the numeric value any time. See the [Nu
 ## References
 
  * <http://developer.android.com/guide/topics/ui/controls.html>
+ * [Buttons](http://developer.android.com/guide/topics/ui/controls/button.html)
+ * [Text Fields](http://developer.android.com/guide/topics/ui/controls/text.html)
+ * [Checkboxes](http://developer.android.com/guide/topics/ui/controls/checkbox.html)
+ * [Radio Buttons](http://developer.android.com/guide/topics/ui/controls/radiobutton.html)
+ * [Spinners](http://developer.android.com/guide/topics/ui/controls/spinner.html)
+ * [SeekBar](http://developer.android.com/reference/android/widget/SeekBar.html)
+ * [RatingBar](http://developer.android.com/reference/android/widget/RatingBar.html)
+ * [NumberPicker](http://developer.android.com/reference/android/widget/NumberPicker.html)
+ * [Switch](http://developer.android.com/reference/android/widget/Switch.html)
+ * [Date and Time Pickers](http://developer.android.com/guide/topics/ui/controls/pickers.html)
+

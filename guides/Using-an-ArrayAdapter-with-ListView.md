@@ -23,7 +23,8 @@ Here is another related diagram on view recycling:
 
 <img src="https://i.imgur.com/SZ8iKuu.jpg" width="500" />
 
-Refer to [this ListView guide](http://android.amberfog.com/?p=296) for another look at how this works to optimize the performance of your lists.
+Refer to [this ListView guide](http://android.amberfog.com/?p=296) for another look at how this works to optimize the performance of your lists. Be sure to check out [this Udacity video on view recycling](https://www.youtube.com/watch?v=2lcoB5-PCCw) as well.  If you wish to evaluate how fast your ListView is rendering, check out the [Profiling GPU](https://developer.android.com/studio/profile/dev-options-rendering.html) 
+tool, which provides a graphical way of visualizing the layout performance.
 
 ## Using a Basic ArrayAdapter
 
@@ -118,7 +119,8 @@ public class UsersAdapter extends ArrayAdapter<User> {
 }
 ```
 
-That adapter has a constructor and a `getView()` method to describe the **translation between the data item and the View** to display.  `getView()` is the method that returns the actual view used as a row within the `ListView` at a particular position. Another method used is `getItem()` which is already present in the `ArrayAdapter` Class and its task is to simply get the data item associated with the specified `position` in the data set which is associated with that `ArrayAdapter`.
+That adapter has a constructor and a `getView()` method to describe the **translation between the data item and the View** to display.  
+`getView()` is the method that returns the actual view used as a row within the `ListView` at a particular position. Another method used is `getItem()` which is already present in the `ArrayAdapter` class and its task is to simply get the data item associated with the specified `position` in the data set which is associated with that `ArrayAdapter`.
 
 ## Attaching the Adapter to a ListView
 
@@ -194,6 +196,57 @@ public class User {
 
 For more details, check out our guide on [[converting JSON into a model|Converting JSON to Models]]. If you are not using a JSON source for your data, you can safely skip this step.
 
+## Attaching Event Handlers Within Adapter
+
+Within a `ListView`, we can easily [attach event listeners](http://guides.codepath.com/android/Basic-Event-Listeners#view-event-listeners) onto any of the views that are item position aware with:
+
+```java
+public class UsersAdapter extends ArrayAdapter<User> {
+    // ...
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        // ...
+        // Lookup view for data population
+        Button btButton = (Button) convertView.findViewById(R.id.btButton);
+        // Cache row position inside the button using `setTag`
+        btButton.setTag(position); 
+        // Attach the click event handler
+        btButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int position = (Integer) view.getTag();
+                // Access the row position here to get the correct data item
+                User user = getItem(position);
+                // Do what you want here...
+            }
+        });
+        // ... other view population as needed...
+        // Return the completed view
+        return convertView;
+    }
+}
+```
+
+You can also similarly pass an entire object through a tag as well as shown here:
+
+```java
+// Inside adapter `getView` method
+User user = getItem(position);
+// Cache user object inside the button using `setTag`
+btButton.setTag(user); 
+// Attach the click event handler
+btButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        // Access user from within the tag
+        User user = (User) view.getTag();
+        // Do what you want here...
+    }
+});
+```
+
+With this approach you can easily access data as needed from within any event handlers.
+
 ## Improving Performance with the ViewHolder Pattern
 
 To improve performance, we should modify the custom adapter by applying the **ViewHolder** pattern which speeds up the population of the ListView considerably by caching view lookups for smoother, faster item loading:
@@ -217,16 +270,20 @@ public class UsersAdapter extends ArrayAdapter<User> {
        // Check if an existing view is being reused, otherwise inflate the view
        ViewHolder viewHolder; // view lookup cache stored in tag
        if (convertView == null) {
+          // If there's no view to re-use, inflate a brand new view for row
           viewHolder = new ViewHolder();
           LayoutInflater inflater = LayoutInflater.from(getContext());
           convertView = inflater.inflate(R.layout.item_user, parent, false);
           viewHolder.name = (TextView) convertView.findViewById(R.id.tvName);
           viewHolder.home = (TextView) convertView.findViewById(R.id.tvHome);
+          // Cache the viewHolder object inside the fresh view
           convertView.setTag(viewHolder);
        } else {
+           // View is being recycled, retrieve the viewHolder object from tag
            viewHolder = (ViewHolder) convertView.getTag();
        }
-       // Populate the data into the template view using the data object
+       // Populate the data from the data object via the viewHolder object 
+       // into the template view.
        viewHolder.name.setText(user.name);
        viewHolder.home.setText(user.hometown);
        // Return the completed view to render on screen
@@ -235,7 +292,7 @@ public class UsersAdapter extends ArrayAdapter<User> {
 }
 ```
 
-In this example we also have a private static class called `ViewHolder`.  Making calls to `findViewById()` is really slow in practice, and if your adapter has to call it for each View in your row for every single row then you will quickly run into performance issues.  What the ViewHolder class does is cache the call to `findViewById()`.  Once your ListView has reached the max amount of rows it can display on a screen, Android is smart enough to begin recycling those row Views.  We check if a View is recycled with `if (convertView == null)`.  If it is not null then we have a recycled View and can just change its values, otherwise we need to create a new row View.  The magic behind this is the `setTag()` method which lets us attach an arbitrary object onto a View object, which is how we save the already inflated View for future reuse.
+In this example we also have a private static class called `ViewHolder`.  Making calls to `findViewById()` can be slow in practice, and if your adapter has to call it for each `View` in your row for every single row then you can often run into performance issues.  What the `ViewHolder` class does is cache the call to `findViewById()`.  Once your ListView has reached the max amount of rows it can display on a screen, Android is smart enough to begin recycling those row Views.  We check if a View is recycled with `if (convertView == null)`.  If it is not null then we have a recycled View and can just change its values, otherwise we need to create a new row View.  The magic behind this is the `setTag()` method which lets us attach an arbitrary object onto a View object, which is how we save the already inflated `View` for future reuse.
 
 ### Beyond ViewHolders
 

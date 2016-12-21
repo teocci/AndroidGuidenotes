@@ -93,9 +93,15 @@ In addition to string resources shown above, the following common resource types
 The colors can be accessed in Java code with:
 
 ```java
-Resources res = getResources();
-int color = res.getColor(R.color.yellow);
+// getResources().getColor() is now deprecated
+// Resources res = getResources();
+// int color = res.getColor(R.color.yellow); 
+
+// Use ContextCompatResources instead of getColor()
+int color = ContextCompat.getColor(context, R.color.yellow);
 ```
+
+It is important to note that the most current way of accessing color resources (since API 24) requires providing context in order to resolve any custom [[theme|Styles and Themes]] attributes.  See [this article](http://www.androiddesignpatterns.com/2016/08/contextcompat-getcolor-getdrawable.html) for more context.
 
 and referenced within any view in the XML using:
 
@@ -290,11 +296,13 @@ Generally speaking phones and phablets are between `sw240` and `sw480`. 7" table
 
 For a detailed tutorial on how to manage responsive layouts for tablets, review our [[Flexible User Interfaces]] guide. You can also review this [article on UI design best practices](http://www.evoketechnologies.com/blog/effective-ui-design-tips-android-devices/) and [this official doc on resources](http://developer.android.com/guide/topics/resources/providing-resources.html) for more details.
 
+There's also a list of Android phone screens and dimensions each one use that you can find [here](https://material.io/devices/)
+
 ### Layout Best Practices
 
 Here is a quick checklist about how you can ensure that your application displays properly on different screens:
 
-* Avoid use hard coded pixel values in your application code
+* Avoid using hard coded pixel values in your application code
 * Use `RelativeLayout` properly and never use `AbsoluteLayout` 
 * Use `wrap_content`, `match_parent`, or `dp` units when specifying dimensions
 * Use alternate layouts and drawables to ensure a responsive design when needed
@@ -317,3 +325,4 @@ When you request a resource for which you provide alternatives, Android selects 
  * <http://developer.android.com/guide/topics/resources/providing-resources.html>
  * <http://developer.android.com/training/multiscreen/screendensities.html>
  * <http://www.evoketechnologies.com/blog/effective-ui-design-tips-android-devices/>
+ * <http://www.androiddesignpatterns.com/2016/08/contextcompat-getcolor-getdrawable.html/>

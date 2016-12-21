@@ -24,7 +24,7 @@ Select `Android Library`.  There is the option to choose `Java library`, but the
 
 <img src="http://imgur.com/xDUBjYg.png"/>
 
-You will prompted next to provide a name and the module name.  The name will simply be used to [label](http://developer.android.com/guide/topics/manifest/manifest-intro.html#iconlabel) the application in the Android Manifest file, while the module name will correspond to the directory to be created:
+Next, you will be prompted to provide a name and the module name.  The name will simply be used to [label](http://developer.android.com/guide/topics/manifest/manifest-intro.html#iconlabel) the application in the Android Manifest file, while the module name will correspond to the directory to be created:
 
 <img src="http://imgur.com/kNKP51f.png"/>
 
@@ -79,7 +79,7 @@ dependencies {
 
 #### Using with ButterKnife
 
-If you intend use the library with [ButterKnife](https://github.com/JakeWharton/butterknife/issues/45), you will find that it does not work with Android libraries.  There are specific reasons for not supporting it as stated [here](https://github.com/JakeWharton/butterknife/issues/100).  For any existing code, you will have to convert your `@InjectView` annotations back to `findViewById()` calls.  
+If you intend use the library with [ButterKnife](https://github.com/JakeWharton/butterknife/issues/45), in the past it did not work with Android libraries and you had to convert your code back to `findViewById` calls.  You should upgrade to at least v8.2.0 and follow this [[section|Reducing-View-Boilerplate-with-Butterknife#using-in-your-own-android-libraries]] to enable your libraries to use it.
 
 ### Publishing
 
@@ -126,7 +126,7 @@ buildscript {
    }
    dependencies {
      // used to generate a POM file
-     classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+     classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
    }
 }
  
@@ -185,6 +185,20 @@ bintray {
 }
 ```
 
+To upload your package, just type:
+
+```bash
+
+```bash
+# Set your Bintray user ID below
+export BINTRAY_USER="codepath"
+# Set your Bintray API key below
+export BINTRAY_API_KEY="YOUR_BINTRAY_API_KEY_HERE"
+./gradlew <subproject name>:bintrayUpload // i.e. ./gradlew app:bintrayUpload
+```
+
+You need to specify a subproject currently because of this [reported bug](https://github.com/bintray/gradle-bintray-plugin/issues/74#issuecomment-244616013).
+
 #### Setting up a private Amazon S3 Maven repository
 
 Another approach is to setup a private Maven repository, which also be done through Amazon's Web Services (AWS) and the Simple Storage Service [(S3)](https://aws.amazon.com/s3/).  Gradle supports the ability to access private S3 repositories with a secret access key and ID used to authenticate with Amazon:
@@ -206,6 +220,7 @@ allprojects {
             }
         }
     }
+}
 ```
 
 Instead of adding the keys directly, it is recommended that you add it to your `local.properties` to your local machine:
@@ -215,48 +230,50 @@ AWS_ACCESS_KEY=<my_aws_access_key>
 AWS_SECRET_KEY=<my_super_secret_key>
 ```
 
-In order to publish the plugin, we need to create a separate Gradle file that can be use in our library configuration.  Create a file called `gradle/gradle-mvn-push.gradle`, which will apply the Gradle-Maven plugin and specify the location of the S3 bucket when using the `./gradlew uploadArchives` command:
+In order to publish the plugin, we need to create a separate Gradle file that can be use in our library configuration.  Create a file called `gradle/gradle-mvn-push.gradle`, which will apply the Gradle-Maven plugin and specify the location of the S3 bucket when using the `./gradlew publish` command:
 
 ```gradle
-apply plugin: 'maven'
+// Inspired from https://gist.github.com/adrianbk/c4982e5ebacc6b6ed902
+
+apply plugin: 'maven-publish'
 
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
 }
 
 def getOutputDir() {
-  if (isReleaseBuild()) {
-      return "${project.buildDir}/releases"
-  } else {
-      return "${project.buildDir}/snapshots"
-  }
+    if (isReleaseBuild()) {
+        return "${project.buildDir}/releases"
+    } else {
+        return "${project.buildDir}/snapshots"
+    }
 }
 
 def getDestUrl() {
-  if (isReleaseBuild()) {
-      return "s3://yourmavenrepo-bucket/android/releases"
-  } else {
-      return "s3://yourmavenrepo-bucket/android/snapshots"
-  }
+    if (isReleaseBuild()) {
+        return "s3://my-bucket/releases"
+    } else {
+        return "s3://my-bucket/snapshots"
+    }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-          // repository(url: "file:///" + getOutputDir()) can also be used to copy to local file
-          repository(url: getDestUrl()) // for copying directly to S3
-
-          pom.groupId = GROUP
-          pom.artifactId = POM_ARTIFACT_ID
-          pom.version = VERSION_NAME
-
-          pom.project {
-             name POM_NAME
-             packaging POM_PACKAGING
-             description POM_DESCRIPTION
-          }
+publishing {
+    publications {
+        myPublication (MavenPublication) {
+            groupId GROUP
+            artifactId POM_ARTIFACT_ID
+            version VERSION_NAME
         }
-    }
+   }
+   repositories {
+      maven {
+        url getDestUrl()
+        credentials(AwsCredentials) {
+         accessKey = "key"
+         secretKey = "password"
+        }
+      }
+   }
 }
 
 ```
@@ -285,7 +302,9 @@ POM_PACKAGING=aar
 
 #### Support for Amazon IAM Roles
 
-Currently Gradle's Amazon S3 integration only supports access keys and does not support [Identity Access Management (IAM)](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) roles.  To take advantage of a client that does, you can output the repository to a local file and use the AWS command-line client to copy the snapshot dirs:  
+Currently Gradle's Amazon S3 integration only supports access keys and does not support [Identity Access Management (IAM)](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html) roles.  There is an existing backlog as reported in this [ticket](https://discuss.gradle.org/t/sts-iam-role-credentials-for-s3-maven-repository/14010) but currently it is not officially supported.
+
+To take advantage of a client that does, you can output the repository to a local file and use the AWS command-line S3 client to copy the snapshot dirs:  
 
 ```gradle
 
@@ -409,3 +428,5 @@ The tool should decode your `.apk` file and allow you to better understand how t
 
 * <http://ryanharter.com/blog/2015/06/18/hosting-a-private-maven-repo-on-amazon-s3/>
 * <http://chris.banes.me/2013/08/27/pushing-aars-to-maven-central/>
+* <https://gist.github.com/adrianbk/c4982e5ebacc6b6ed902/>
+* <https://github.com/gradle/gradle/blob/master/design-docs/finding-and-using-credentials.md#story-an-s3-repository-can-be-configured-to-authenticate-using-awss-ec2-instance-metadata/>

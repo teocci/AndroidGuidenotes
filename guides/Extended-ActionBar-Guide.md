@@ -279,6 +279,9 @@ Notice that the `app:showAsAction` attribute also includes the "collapseActionVi
 Now we need to hook up a listener for when a search is performed:
 
 ```java
+// Make sure to import the support version of the SearchView
+import android.support.v7.widget.SearchView;
+
 @Override
 public boolean onCreateOptionsMenu(Menu menu) {
     MenuInflater inflater = getMenuInflater();
@@ -338,6 +341,18 @@ public boolean onCreateOptionsMenu(Menu menu) {
     et.setTextColor(Color.BLACK);
     et.setHintTextColor(Color.BLACK);
 }
+```
+
+We can customize the up button that appears when the search view is activated with [this approach](http://stackoverflow.com/a/35482445/1715285) or the code below:
+
+Use the `app:collapseIcon` to modify the color/style of your drawable.
+
+```xml
+<android.support.v7.widget.Toolbar
+         android:id="@+id/toolbar"
+         android:layout_width="match_parent"
+         android:layout_height="@dimen/toolbarHeight"
+         app:collapseIcon="@drawable/collapseBackIcon" />
 ```
 
 See [this writeup](http://antonioleiva.com/actionbarcompat-action-views/) for details on the compatibility action views outlined above. For more advanced searching functionality, check out the [Creating a Search Interface](http://developer.android.com/guide/topics/search/search-dialog.html) guide.

@@ -30,7 +30,7 @@ To use Toolbar as an ActionBar, first ensure the AppCompat-v7 support library is
 ```gradle
 dependencies {
   ...
-  compile 'com.android.support:appcompat-v7:23.1.0'
+  compile 'com.android.support:appcompat-v7:24.2.0'
 }
 ```
 
@@ -51,6 +51,7 @@ Now you need to add a `Toolbar` to your Activity layout file. One of the biggest
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
@@ -66,6 +67,8 @@ Now you need to add a `Toolbar` to your Activity layout file. One of the biggest
 
 </LinearLayout>
 ```
+
+**Note:** You'll want to add `android:fitsSystemWindows="true"` ([learn more](https://medium.com/google-developers/why-would-i-want-to-fitssystemwindows-4e26d9ce1eec)) to the parent layout of the `Toolbar` to ensure that the height of the activity is calculated correctly. 
 
 As Toolbar is just a `ViewGroup` and can be **styled and positioned like any other view**. Note that this means if you are in a `RelativeLayout`, you need to ensure that all other views are positioned below the toolbar explicitly. The toolbar is not given any special treatment as a view.
 
@@ -147,6 +150,7 @@ Next, we can use the `<include />` tag to load the toolbar into our activity lay
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <!-- Load the toolbar here -->
@@ -293,6 +297,52 @@ TextView mTitle = (TextView) toolbar.findViewById(R.id.toolbar_title);
 Note that you **must hide the default title using `setDisplayShowTitleEnabled`**. This results in:
 
 <img src="http://i.imgur.com/2Lu7Eru.png" width="450" />
+
+### Translucent Status Bar
+
+In certain cases, the status bar should be translucent such as:
+
+<img src="http://i.imgur.com/s5okeLm.png" width="200" />
+
+To achieve this, first set these properties in your `res/values/styles.xml` within the main theme:
+
+```xml
+<item name="android:statusBarColor">@android:color/transparent</item>
+<item name="android:navigationBarColor">@android:color/transparent</item>
+<item name="android:windowTranslucentStatus">true</item>
+<item name="android:windowTranslucentNavigation">true</item>
+<item name="android:windowDrawsSystemBarBackgrounds">true</item>
+```
+
+The activity or root layout that will have a transparent status bar needs have the [fitsSystemWindows](https://medium.com/google-developers/why-would-i-want-to-fitssystemwindows-4e26d9ce1eec#.sfz8kajj8) property set in the layout XML:
+
+```xml
+<RelativeLayout
+  android:fitsSystemWindows="true"
+  ...
+>
+```
+
+You should be all set. Refer to [this stackoverflow post](http://stackoverflow.com/a/31596735) for more details. 
+
+### Transparent Status Bar
+
+If you want the status bar to be entirely transparent for KitKat and above, the easiest approach is to:
+
+```java
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+  Window w = getWindow(); // in Activity's onCreate() for instance
+  w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+}
+```
+
+and then add this style to your `res/values/styles.xml` within the main theme:
+
+```xml
+<item name="android:windowDrawsSystemBarBackgrounds">true</item>
+```
+
+You should be all set. Refer to [this stackoverflow post](http://stackoverflow.com/a/31596735) for more details. 
 
 ## Reacting to Scroll
 

@@ -131,7 +131,9 @@ To add the fragment **statically**, simply embed the fragment in the activity's 
 </LinearLayout>
 ```
 
-Note: You will likely need to change the path for FooFragment based on your project setup.
+Note: 
+* You will likely need to change the path for FooFragment based on your project setup.
+* You cannot replace a fragment defined statically in the layout file via a FragmentTransaction. You can only replace fragments that you added dynamically.
 
 #### Dynamically
 
@@ -233,6 +235,14 @@ public class SomeFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         ListView lv = (ListView) view.findViewById(R.id.lvSome);
         lv.setAdapter(adapter);
+    }
+
+    // This method is called when the fragment is no longer connected to the Activity
+    // Any references saved in onAttach should be nulled out here to prevent memory leaks. 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        this.listener = null;
     }
         
     // This method is called after the parent Activity's onCreate() method has completed.

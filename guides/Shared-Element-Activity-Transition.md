@@ -160,6 +160,26 @@ getWindow().setEnterTransition(new Explode());
 getWindow().setExitTransition(new Explode());
 ```
 
+#### Excluding window content transitions
+
+Often times you want to exclude from the animation sequence the use of the status bar, ActionBar, and [navigation bar](https://developer.android.com/training/system-ui/navigation.html), especially if shared elements will be drawn on top of them (see this [Google post](https://plus.google.com/+AlexLockwood/posts/RPtwZ5nNebb) for more details).  You can exclude these elements by add a `<targets>` tag and specify the ID of the elements to exclude:
+
+```xml
+<slide xmlns:android="http://schemas.android.com/apk/res/android"
+    android:slideEdge="right"
+    android:duration="1000">
+
+    <targets>
+        <!-- if using a custom Toolbar container, specify the ID of the AppBarLayout -->
+        <target android:excludeId="@id/app_bar_layout" />
+        <target android:excludeId="@android:id/statusBarBackground"/>
+        <target android:excludeId="@android:id/navigationBarBackground"/>
+    </targets>
+
+</slide>
+```
+
+
 See this official guide on [Defining Custom Animations](https://developer.android.com/training/material/animations.html#Transitions) for more details.
 
 ## Fragment Shared Elements Transitions
@@ -238,6 +258,7 @@ else {
 
 Note that we need use methods on the exiting fragment such as `setSharedElementReturnTransition` and `setExitTransition`. On the entering fragment, we call `setSharedElementEnterTransition` and `setEnterTransition`. Finally we need to find the instance of the shared element and then call `addSharedElement(view, transitionName)` as part of building the `FragmentTransaction`. Additional external resources for fragment-to-fragment shared element transitions include:
 
+ * [Fragment Transitions Detailed Tutorial](https://medium.com/@bherbst/fragment-transitions-with-shared-elements-7c7d71d31cbb)
  * [Android Authority article](http://www.androidauthority.com/using-shared-element-transitions-activities-fragments-631996/) covering the basics
  * [Medium article on fragment shared element transitions](https://medium.com/@bherbst/fragment-transitions-with-shared-elements-7c7d71d31cbb#.gx3casxjb)
  * [Useful stackoverflow post](http://stackoverflow.com/questions/26561579/how-to-start-shared-element-transition-using-fragments/27173907#27173907) for more details
@@ -251,3 +272,4 @@ With that you can apply these handy transitions to fragments as well as to activ
 * <https://developer.android.com/training/material/animations.html>
 * <http://java.dzone.com/articles/material-design-activity>
 * <https://www.youtube.com/watch?v=97SWYiRtF0Y&t=1403>
+* <https://medium.com/@bherbst/fragment-transitions-with-shared-elements-7c7d71d31cbb#.x8pops1ap>

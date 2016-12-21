@@ -18,7 +18,7 @@ apply plugin: 'com.android.application'
 
 dependencies {
     // ...
-    compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.android.support:support-v4:24.2.1'
 }
 ```
 
@@ -88,6 +88,8 @@ public class TimelineActivity extends Activity {
     public void fetchTimelineAsync(int page) {
         // Send the network request to fetch the updated data
         // `client` here is an instance of Android Async HTTP
+        // getHomeTimeline is an example endpoint.
+
         client.getHomeTimeline(0, new JsonHttpResponseHandler() {
             public void onSuccess(JSONArray json) {
                 // Remember to CLEAR OUT old items before appending in the new ones
@@ -170,6 +172,8 @@ If you aren't able to get the swipe to refresh working, check the following tips
 * **Did you invoke `setRefreshing(false)` after data finished loading?** With the swipe to refresh control, you are responsible for notifying the system once the new data has been loaded into the list. You must make sure to invoke [setRefreshing](http://developer.android.com/reference/android/support/v4/widget/SwipeRefreshLayout.html#setRefreshing\(boolean\)) only **after** the data has come back and not before. This means if you are loading data from the network, calling this within the `onSuccess` method.
 
 * **Did you clear out the old items before updating the list?** Make sure that in order for the new items to be displayed that you **clear the list of any old items if needed**. In other words, if you are replacing items in the list with new versions, be sure to remove the old versions from the adapter first with `adapter.clear();`
+
+* **Are you using CoordinatorLayout?** If you are [[using a CoordinatorLayout|Handling-Scrolls-with-CoordinatorLayout]] to manage scrolling, be sure to move the `app:layout_behavior="@string/appbar_scrolling_view_behavior"` property to the `SwipeRefreshLayout` rather than the child `RecyclerView` or `ListView`.
 
 ## References
 

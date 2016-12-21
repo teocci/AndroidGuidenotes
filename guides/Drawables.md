@@ -14,7 +14,7 @@ There are at least 17 types of drawables but there are five that are most import
 
 1. **Shape Drawables** - Defines a shape with properties such as stroke, fill, and padding
 2. **StateList Drawables** - Defines a list of drawables to use for different states
-3. **LayerList Drawables** - Defines a list of drawables group together into a composite result
+3. **LayerList Drawables** - Defines a list of drawables grouped together into a composite result
 4. **NinePatch Drawables** - A PNG file with stretchable regions to allow proper resizing
 5. **Vector Drawables** - Defines complex XML-based vector images
 
@@ -61,7 +61,7 @@ Note that **drawables can be applied to any view** and are usually set with the 
 
 #### Gradient Colored Shapes
 
-Shapes also support [gradients backgrounds](http://developer.android.com/guide/topics/resources/drawable-resource.html#gradient-element) as well supporting properties such as `startColor`, `centerColor`, `endColor`, `angle`. Different gradients such as radial, linear or sweep can be selected using the `type` property. 
+Shapes also support [gradients backgrounds](http://developer.android.com/guide/topics/resources/drawable-resource.html#gradient-element) as well as supporting properties such as `startColor`, `centerColor`, `endColor`, `angle`. Different gradients such as radial, linear or sweep can be selected using the `type` property. 
 
 Here's an example of a simple linear gradient shape specified in `res/layout/drawable/gradient_shape.xml`:
 
@@ -110,7 +110,7 @@ Using solid color shapes and gradients we can customize the appearance of button
 
 ### State List
 
-A [StateListDrawable](http://developer.android.com/guide/topics/resources/drawable-resource.html#StateList) is a drawable object defined in XML that uses a several different images to represent the same graphic, depending on the state of the object. For example, a Button widget can exist in one of several different states (pressed, focused, or neither) and, using a state list drawable, you can provide a different background image for each state. The state list supports different view states such as `android:state_pressed`, `android:state_focused`, `android:state_enabled`, `android:state_selected`, among many others.  The illustration below shows all the major states that can be represented:
+A [StateListDrawable](http://developer.android.com/guide/topics/resources/drawable-resource.html#StateList) is a drawable object defined in XML that uses several different images to represent the same graphic, depending on the state of the object. For example, a Button widget can exist in one of several different states (pressed, focused, or neither) and, using a state list drawable, you can provide a different background image for each state. The state list supports different view states such as `android:state_pressed`, `android:state_focused`, `android:state_enabled`, `android:state_selected`, among many others.  The illustration below shows all the major states that can be represented:
 
 <img src="http://developer.android.com/design/media/touch_feedback_states.png">
 
@@ -172,7 +172,7 @@ Common use cases for layer lists include:
  * [Drawing Cards](http://android-dev-tips-and-tricks.blogspot.com/2014/02/creating-card-ui.html)
  * [Drawing Triangles](https://looksok.wordpress.com/2013/08/24/android-triangle-arrow-defined-as-an-xml-shape/) 
 
-For a simple example, the following layer list draws several shapes in relation each other:
+For a simple example, the following layer list draws several shapes in relation to each other:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -213,11 +213,11 @@ Keep in mind that the items in a [LayerList](http://developer.android.com/guide/
 
 ### Stretchable Nine-Patch Image
 
-A [NinePatch](http://developer.android.com/guide/topics/graphics/2d-graphics.html#nine-patch) is a PNG image in which you can **define stretchable regions that is stretched** when content within the View exceeds the normal image bounds. You typically assign this type of image as the background of a View which has width set to `wrap_content`. The most common use is a button that has to stretch based on the text displayed inside.
+A [NinePatch](http://developer.android.com/guide/topics/graphics/2d-graphics.html#nine-patch) is a PNG image in which you can **define stretchable regions that are stretched** when the content within the View exceeds the normal image bounds. You typically assign this type of image as the background of a View which has its width set to `wrap_content`. The most common use is a button that has to stretch based on the text displayed inside.
 
 <img src="https://i.imgur.com/JHVsslP.png" width="450" alt="9patch" />
 
-NinePatch are images that have a `.9.png` file extension signifies that this is a stretchable PNG image.  The file is no different from a normal PNG file except that you will add thin black lines to indicate the vertical and horizontal "stretchable" and "fill" areas for the image. Android will not show these guide lines, which are used to determine how the image should be rendered.
+NinePatch are images that have a `.9.png` file extension, which signifies that this is a stretchable PNG image.  The file is no different from a normal PNG file except that you will add thin black lines to indicate the vertical and horizontal "stretchable" and "fill" areas for the image. Android will not show these guide lines, which are used to determine how the image should be rendered.
 
 An example of a 9-patch image is embedded below (left is the 9patch graphic, right is an example of use in an app):
 
@@ -290,11 +290,18 @@ This results in the following image being rendered:
 
 <img src="http://i.imgur.com/zcHxiii.png" width="250" />
 
-See [the official release blog post](http://android-developers.blogspot.com/2016/02/android-support-library-232.html) for additional compatibility notes and this [video talk](https://www.youtube.com/watch?v=wlFVIIstKmA). 
+You can also set a vector at runtime using:
+
+```java
+ImageView iv = (ImageView) findViewById(...);
+iv.setImageResource(R.drawable.ic_heart);
+```
+
+Be sure to check out this great [age of vectors blog post](https://medium.com/@chrisbanes/appcompat-v23-2-age-of-the-vectors-91cbafa87c88#.4ys7p2hoq) for a more detailed look at vectors. Also see [the official release blog post](http://android-developers.blogspot.com/2016/02/android-support-library-232.html) for additional compatibility notes and this [video talk](https://www.youtube.com/watch?v=wlFVIIstKmA). 
 
 #### Finding Vector Drawables
 
-Vector drawables can now be found directly within Android Studio and also on many Android resource websites. Assuming you have updated to Android Studio v2.2 (currently in [preview release](http://tools.android.com/download/studio/canary/latest)), you can check for vector drawables inside the `File => New => Vector Asset` wizard:
+Vector drawables can now be found directly within Android Studio and also on many Android resource websites. Assuming you have updated to Android Studio v2.2, you can check for vector drawables inside the `File => New => Vector Asset` wizard:
 
 <img src="http://i.imgur.com/VkmWDpP.png" height="250" />&nbsp;<img src="http://i.imgur.com/EjI3mm9.png" height="250" />
 
@@ -311,6 +318,7 @@ In addition, there are several ways to create vector drawables directly from SVG
  * [Vector Asset Studio](http://developer.android.com/tools/help/vector-asset-studio.html) is a utility included in Android Studio (shown above) for converting SVG assets into vector drawables. 
  * [SVG2Android Online Utility](http://inloop.github.io/svg2android/) converts SVG into vectors right in your browser.
  * [Command-line SVG Converter](https://github.com/a-student/SvgToVectorDrawableConverter) can batch convert SVGs to vectors.
+ * [Vectorizer](https://www.vectorizer.io) - Transform a PNG image into an SVG to be converted to a vector drawable.
 
 You can refer to [this VectorDrawables guide for more details](http://developer.android.com/training/material/drawables.html#VectorDrawables). 
 
@@ -580,6 +588,19 @@ outerRect.setColor(Color.parseColor("#2f8f22"));
 ```
 
 Note that the shape is accessed as a `GradientDrawable` here even though the shape is a solid color.
+
+### Runtime Vector Drawables
+
+If you are using vector drawables or animated vector drawables at runtime for pre-Lollipop devices, make sure to use the new `AppCompatResource` class instead of the normal `getDrawable()` call, especially if you reference custom theme attributes (i.e. `?attr/colorAccent) in your drawables:
+
+```java
+// Use AppCompatResource so that it will accurately use theme attributes
+Drawable drawable = AppCompatResources.getDrawable(R.drawable.ic_test_24dp);
+
+// Use this drawable
+ImageView imageView = (ImageView) findViewById(R.id.tst);
+imageView.setBackground(drawable);
+```
 
 ## Additional Drawable Types
 

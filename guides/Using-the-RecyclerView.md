@@ -63,12 +63,13 @@ The steps are explained in more detail below.
 
 ### Installation
 
-Make sure the recyclerview support library is listed as a dependency in your `app/build.gradle`:
+Make sure the RecyclerView support library is listed as a dependency in your `app/build.gradle`:
 
 ```gradle
 dependencies {
     ...
-    compile 'com.android.support:recyclerview-v7:23.2.1'
+    compile 'com.android.support:support-v4:24.2.1'
+    compile 'com.android.support:recyclerview-v7:24.2.1'
 }
 ```
 
@@ -362,6 +363,75 @@ contacts.addAll(newItems);
 adapter.notifyItemRangeInserted(curSize, newItems.size());
 ```
 
+### Diffing Larger Changes
+
+Often times there are cases when changes to your list are more complex (i.e. sorting an existing list) and it cannot be easily determined whether each row changed.  In this cases, you would normally have to call `notifyDataSetChanged()` on the entire adapter to update the entire screen, which eliminates the ability to perform animation sequences to showcase what changed.
+
+A new `DiffUtil` class has been added in the v24.2.0 of the support library to help compute the difference between the old and new list.   This class uses the same algorithm used for computing line changes in source code (the [diff utility](https://en.wikipedia.org/wiki/Diff_utility) program), so it usually fairly fast.  It is recommended however for larger lists that you execute this computation in a background thread.
+ 
+To use the `DiffUtil` class, you need to first implement a class that implements the `DiffUtil.Callback` that accepts the old and new list:
+
+```java
+
+public class ContactDiffCallback extends DiffUtil.Callback {
+
+    private List<Contact> mOldList;
+    private List<Contact> mNewList;
+
+    public ContactDiffCallback(List<Contact> oldList, List<Contact> newList) {
+        this.mOldList = oldList;
+        this.mNewList = newList;
+    }
+    @Override
+    public int getOldListSize() {
+        return mOldList.size();
+    }
+
+    @Override
+    public int getNewListSize() {
+        return mNewList.size();
+    }
+
+    @Override
+    public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+        // add a unique ID property on Contact and expose a getId() method
+        return mOldList.get(oldItemPosition).getId() == mNewList.get(newItemPosition).getId();
+    }
+
+    @Override
+    public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+        Contact oldContact = mOldList.get(oldItemPosition);
+        Contact newContact = mNewList.get(newItemPosition);
+
+        if (oldContact.getName() == newContact.getName() && oldContact.isOnline() == newContact.isOnline()) {
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+Next, you would implement a `swapItems()` method on your adapter to perform the diff and then invoke `dispatchUpdates()` to notify the adapter whether the element was inserted, removed, moved, or changed:
+
+```java
+public class ContactsAdapter extends
+        RecyclerView.Adapter<ContactsAdapter.ViewHolder> {
+
+  public void swapItems(List<Contact> contacts) {
+        // compute diffs
+        final ContactDiffCallback diffCallback = new ContactDiffCallback(this.mContacts, contacts);
+        final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+
+        // clear contacts and add 
+        this.mContacts.clear();
+        this.mContacts.addAll(contacts);
+
+        diffResult.dispatchUpdatesTo(this); // calls adapter's notify methods after diff is computed
+    }
+}
+```
+
+For a working example, see this [sample code](https://github.com/mrmike/DiffUtil-sample).
 
 ### Scrolling to New Items
 
@@ -389,7 +459,7 @@ The `RecyclerView` is quite flexible and customizable. Several of the options av
 
 ### Performance
 
-We can also enable optimizations if all item views are of the same height and width for significantly smoother scrolling:
+We can also enable optimizations if the items are static and will not change for significantly smoother scrolling:
 
 ```java
 recyclerView.setHasFixedSize(true);
@@ -400,11 +470,9 @@ recyclerView.setHasFixedSize(true);
 The positioning of the items is configured using the layout manager. By default, we can choose between `LinearLayoutManager`, `GridLayoutManager`, and `StaggeredGridLayoutManager`. Linear displays items either vertically or horizontally:
 
 ```java
-// Setup layout manager for items
-LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-// Control orientation of the items
-// also supports LinearLayoutManager.HORIZONTAL
-layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+// Setup layout manager for items with orientation
+// Also supports `LinearLayoutManager.HORIZONTAL`
+LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 // Optionally customize the position you want to default scroll to
 layoutManager.scrollToPosition(0);
 // Attach layout manager to the RecyclerView
@@ -456,8 +524,14 @@ repositories {
     jcenter()
 }
 
+//If you are using a RecyclerView 23.1.0 or higher.
 dependencies {
-    compile 'jp.wasabeef:recyclerview-animators:2.2.0'
+    compile 'jp.wasabeef:recyclerview-animators:2.2.3'
+}
+
+//If you are using a RecyclerView 23.0.1 or below.
+dependencies {
+    compile 'jp.wasabeef:recyclerview-animators:1.3.0'
 }
 ```
 
@@ -502,6 +576,40 @@ recyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
     
 });
 ```
+
+### Snap to Center Effect
+
+In certain cases, we might want a horizontal `RecyclerView` that allows the user to scroll through a list of items. As the user scrolls, we might want items to "snap to center" as they are revealed. Such as in this example:
+
+<img src="http://i.imgur.com/D5crJK4.gif" width="300" />
+
+#### LinearSnapHelper
+
+To achieve this snapping to center effect as the user scrolls, starting with support library 24.2.0 version and greater, we can use the built-in [LinearSnapHelper](https://developer.android.com/reference/android/support/v7/widget/LinearSnapHelper.html) as follows:
+
+```java
+SnapHelper snapHelper = new LinearSnapHelper();
+snapHelper.attachToRecyclerView(recyclerView);
+```
+
+For more sophisticated snapping behavior, [read more about customizing these helpers](https://rubensousa.github.io/2016/08/recyclerviewsnap) and [review related sample code here](https://github.com/rubensousa/RecyclerViewSnap/).
+
+#### SnappyRecyclerView
+
+For a more manual approach, we can create a custom extension to `RecyclerView` called `SnappyRecyclerView` which will snap items to center as the user scrolls:
+
+1. Copy over the code from [SnappyRecyclerView.java](https://gist.github.com/nesquena/b26f9a253bbbb6a2e4890891e8a57eb9) to your project.
+2. Configure your new `SnappyRecyclerView` with a horizontal `LinearLayoutManager`:
+
+   ```java
+   LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+   snappyRecyclerView.setLayoutManager(layoutManager);
+   ```
+
+3. Attach your adapter to the `RecyclerView` to populate the data into the horizontal list as normal.
+4. You can access the currently "snapped" item position with `snappyRecyclerView.getFirstVisibleItemPosition()`.
+
+That's all, you should be set for a snap-to-center horizontal scrolling list! 
 
 ### Attaching Click Handlers to Items
 
@@ -549,10 +657,12 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
         // Handles the row being being clicked
         @Override
         public void onClick(View view) {
-            int position = getLayoutPosition(); // gets item position
-            User user = users.get(position);
-            // We can access the data within the views
-            Toast.makeText(context, tvName.getText(), Toast.LENGTH_SHORT).show();
+            int position = getAdapterPosition(); // gets item position
+            if (position != RecyclerView.NO_POSITION) { // Check if an item was deleted, but the user clicked it before the UI removed it
+                User user = users.get(position);
+                // We can access the data within the views
+                Toast.makeText(context, tvName.getText(), Toast.LENGTH_SHORT).show();
+            }
         }
     }
     
@@ -586,8 +696,8 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
 
     /***** Creating OnItemClickListener *****/
     
-    // Define listener member variable    
-    private static OnItemClickListener listener;
+    // Define listener member variable
+    private OnItemClickListener listener;
     // Define the listener interface
     public interface OnItemClickListener {
         void onItemClick(View itemView, int position);
@@ -610,8 +720,12 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.ViewHo
                 @Override
                 public void onClick(View v) {
                     // Triggers click upwards to the adapter on click
-                    if (listener != null)
-                        listener.onItemClick(itemView, getLayoutPosition());
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(itemView, position);
+                        }
+                    }
                 }
             });
         }
@@ -640,6 +754,26 @@ See [this detailed stackoverflow post](http://stackoverflow.com/a/24933117/31339
 ## Implementing Pull to Refresh
 
 The `SwipeRefreshLayout` should be used to refresh the contents of a `RecyclerView` via a vertical swipe gesture. See our detailed [[RecyclerView with SwipeRefreshLayout|Implementing-Pull-to-Refresh-Guide#recyclerview-with-swiperefreshlayout]] guide for a step-by-step tutorial on implementing pull to refresh.
+
+## Swipe Detection
+
+RecyclerView (since the release of v24.2.0) now has an `OnFlingListener` method that can be used to implement custom fling behavior.  Download this [RecyclerViewSwipeListener](https://gist.github.com/rogerhu/9e769149f9550c0a6ddb4987b94caee8) and you can handle custom swipe detection by adding this class to your RecyclerView: 
+
+```java
+RecyclerView rvMyList;
+
+rvMyList.setOnFlingListener(new RecyclerViewSwipeListener(true) {
+   @Override
+   public void onSwipeDown() {
+      Toast.makeText(MainActivity.this, "swipe down", Toast.LENGTH_SHORT).show();
+   }
+
+   @Override
+   public void onSwipeUp() {
+      Toast.makeText(MainActivity.this, "swipe up", Toast.LENGTH_SHORT).show();
+   }
+});
+```
 
 ## References
 

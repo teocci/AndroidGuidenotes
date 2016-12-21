@@ -12,11 +12,18 @@ dependencies {
 }
 ```
 
-**Note**: there is a bug with the current version of Picasso that prevents large images (i.e. 10MB) from being loaded, especially with newer camera phones that have larger resolutions.   If you are experiencing [this issue](https://github.com/square/picasso/issues/364), you will need to upgrade to the Picasso 2.5.3 snapshot.  See the [[troubleshooting|Displaying Images with the Picasso Library#troubleshooting]] guide to confirm.
+**Note**: there is a bug with the current version of Picasso that prevents large images (i.e. 10MB) from being loaded, especially with newer camera phones that have larger resolutions.   If you are experiencing [this issue](https://github.com/square/picasso/issues/364), you may need to upgrade to the Picasso 2.6.0 snapshot.  See the [[troubleshooting|Displaying Images with the Picasso Library#troubleshooting]] guide to confirm.
+
+To use this snapshot version, you need to add a custom separate Maven repo first:
 
 ```gradle
+repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+}
+
+// add directly below repositories section
 dependencies {
-    compile 'com.squareup.picasso:picasso:2.5.3-SNAPSHOT'
+    compile 'com.squareup.picasso:picasso:2.6.0-SNAPSHOT'
 }
 ```
 
@@ -104,6 +111,30 @@ builder.listener(new Picasso.Listener() {
 
 ## Advanced Usages
 
+### Showing ProgressBar with Picasso
+
+We can add a progress bar or otherwise handle callbacks for an image that is loading with:
+
+```java
+// Show progress bar
+progressBar.setVisibility(View.VISIBLE);
+// Hide progress bar on successful load
+Picasso.with(this).load(imageUrl)
+  .into(imageView, new com.squareup.picasso.Callback() {
+      @Override
+      public void onSuccess() {
+          if (progressBar != null) {
+              progressBar.setVisibility(View.GONE);
+          }
+      }
+
+      @Override
+      public void onError() {
+
+      }
+});
+```
+
 ### Adjusting Image Size Dynamically
 
 If we wish to readjust the ImageView size after the image has been retrieved, we first define a `Target` object that governs how the Bitmap is handled:
@@ -141,7 +172,7 @@ We can use this custom Target approach to create a staggered image view using `R
 
 <img src="https://i.imgur.com/gsp1prk.png" width="300"/>
 
-We first need to use [DynamicHeightImageView.java](https://github.com/etsy/AndroidStaggeredGrid/blob/master/library/src/main/java/com/etsy/android/grid/util/DynamicHeightImageView.java) that enables us to update the ImageView width and height while still preserving the aspect ratio when new images are replaced with old recycled views. We can set the ratio before the image has loaded if we already know the height:width ratio using `onBindViewHolder` as shown below:
+We first need to replace the `ImageView` with the [DynamicHeightImageView.java](https://github.com/etsy/AndroidStaggeredGrid/blob/master/library/src/main/java/com/etsy/android/grid/util/DynamicHeightImageView.java) that enables us to update the `ImageView` width and height while still preserving the aspect ratio when new images are replaced with old recycled views. We can then set the ratio before the image has loaded if we already know the height:width ratio using `onBindViewHolder` as shown below:
 
 ```java
 public class PhotosAdapter extends RecyclerView.Adapter<PhotoViewHolder> {
@@ -150,6 +181,7 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotoViewHolder> {
     @Override
     public void onBindViewHolder(PhotoViewHolder holder, int position) {
         Photo photo = mPhotos.get(position);
+        // `holder.ivPhoto` should be of type `DynamicHeightImageView`
         // Set the height ratio before loading in image into Picasso
         holder.ivPhoto.setHeightRatio(((double)photo.getHeight())/photo.getWidth());
         // Load the image into the view using Picasso
@@ -179,31 +211,7 @@ public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickL
 }
 ```
 
-Now the staggered grid of images should render as expected.
-
-### Showing ProgressBar with Picasso
-
-We can add a progress bar or otherwise handle callbacks for an image that is loading with:
-
-```java
-// Show progress bar
-progressBar.setVisibility(View.VISIBLE);
-// Hide progress bar on successful load
-Picasso.with(this).load(imageUrl)
-  .into(imageView, new com.squareup.picasso.Callback() {
-      @Override
-      public void onSuccess() {
-          if (progressBar != null) {
-              progressBar.setVisibility(View.GONE);
-          }
-      }
-
-      @Override
-      public void onError() {
-
-      }
-});
-```
+With either of these approaches the staggered grid of images should now render as expected.
 
 ### Other Transformations
 

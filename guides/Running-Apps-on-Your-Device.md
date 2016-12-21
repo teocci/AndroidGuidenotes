@@ -47,13 +47,17 @@ Not seeing your device in the "Choose Device" window? Try the following:
 
  * Unplug your device from the USB port on the computer 
  * Restart the device by powering off and back on
- * Verify that `Settings => Developer options => USB Debugging" is enabled
+ * Verify that `Settings => Developer options => USB Debugging` is enabled
  * Quit and re-launch Android Studio
  * Force [restart ADB](https://www.youtube.com/watch?v=FtdydFDBuQo) from the "Android Device Monitor"
  * Plug your device back into the USB port on the computer 
  * Unlock the device and press "OK" on any dialog displayed
 
 Now the phone should work as a debugging device as expected!
+
+**Still Not Working?**
+
+If after plugging the device into the computer and you don't see any message about authorizing the device, then you may need to purchase another USB cable. Not all USB cables are **enabled for data transfer**. If there's a chance that your cable may be a charging only cable, you can purchase a [USB-C cable for Nexus 6P](https://www.amazon.com/Nekteck-resistor-Charging-Reversible-Macbook/dp/B00VIWE1ZY) or the [micro-USB cable for Nexus 6 and prior](https://www.amazon.com/Mediabridge-USB-2-0-High-Speed-30-004-06B/dp/B004GF8TIK).
 
 ## References
 

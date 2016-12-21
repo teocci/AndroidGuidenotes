@@ -12,13 +12,11 @@ If the debugger isn't working, check the [[guide section below|Troubleshooting-C
 
 ### Network Traffic Inspection
 
-If you are using [[OkHttp|Using-OkHttp]] or [[Retrofit|Consuming-APIs-with-Retrofit]], make sure to include the [Stetho](http://facebook.github.io/stetho/) project.  You can also use Stetho project for inspecting your network traffic through Chrome.  There is no current support with Stetho with [[Android Async Http Client|Using-Android-Async-Http-Client]] as noted in this [issue](https://github.com/facebook/stetho/issues/116).
-
-<img src="http://facebook.github.io/stetho/static/images/inspector-network.png"/>
+If you wish to inspect network traffic, see [[this guide|Troubleshooting-API-Calls]] on how to troubleshoot API calls.  The networking library you use determines what approach you can use.
 
 ### Database Inspection
 
-Also, Stetho can also be used to view your local SQLLite database too:
+Also, the [Stetho](http://facebook.github.io/stetho/) project can be used to view your local SQLLite database.  See [[this guide|Debugging-with-Stetho]] for more details.
 
 <img src="http://facebook.github.io/stetho/static/images/inspector-sqlite.png"/>
 
@@ -54,6 +52,20 @@ If Android Studio starts freezing up or crashing even after rebooting the IDE or
 ```
 
 and then uninstall Android Studio and re-install the latest stable version. This should allow you to boot Android Studio again without errors.
+
+### Android Studio Design Pane isn't loading properly 
+
+If you find yourself opening up a layout file and not seeing the design pane rendering correctly such as:
+
+<img src="http://i.imgur.com/DaArMlC.png" width="300" />
+
+We can try the following steps to get this functioning again:
+
+ * Try changing the API version selected in the dropdown and try a few different versions
+ * Click the "refresh" icon at the top right of the design pane
+ * Select `File -> Invalidate Caches / Restart` and restart Android Studio
+
+You may need to install the newest version of Android and select that version within the dropdown for the pane to work as expected. 
 
 ### Seeing `Unable to execute dex: method ID` when compiling
 
@@ -154,7 +166,10 @@ Some Android Studio plugins do not support Java 1.6 anymore, so it's best to con
 
 <img src="http://imgur.com/Jn2jevR.png"/>
 
-If you have multiple Java versions installed, you should make sure that v1.6 is not being used.
+If you have multiple Java versions installed, you should make sure that v1.6 is not being used. Solutions include:
+
+ * Configuring [JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) as your default Java SDK within Studio. See [this stackoverflow post for solutions](http://stackoverflow.com/a/36262436).
+ * Reset your Android Studio cache and set correct gradle version as [shown in this post](http://stackoverflow.com/a/37467179).
 
 On OS X machines, you can remove the JDK from being noticed.  You can move it the temporary directory in case other issues are created by this change.
 
@@ -195,3 +210,7 @@ This is usually a signal that the emulator instance is not properly connected wi
 ## Eclipse ADT Issues
 
 For common issues experienced with Eclipse, check the [[Troubleshooting Eclipse Issues]] page instead for a detailed list of common problems.
+
+## References
+
+* <https://jaanus.com/debugging-http-on-an-android-phone-or-tablet-with-charles-proxy-for-fun-and-profit/>

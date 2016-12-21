@@ -42,32 +42,50 @@ Alternatively, you can use the [android:alpha](http://developer.android.com/refe
 
 #### How do I align the position of my view or its inner contents?
 
-To align the **position of your view itself** in the layout, you need to use a different method based on the parent layout type. If the view is contained within a `RelativeLayout`, use the [`android:centerInParent`](http://developer.android.com/reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_centerInParent) property to center the view both horizontally and vertically or `android:layout_centerHorizontal` to set just one or the other. 
+To align the **position of your view itself** in the layout, you need to use a different method based on the parent layout type. If the view is contained within a `RelativeLayout`, use the [`android:layout_centerInParent`](http://developer.android.com/reference/android/widget/RelativeLayout.LayoutParams.html#attr_android:layout_centerInParent) property to center the view both horizontally and vertically or `android:layout_centerHorizontal` to set just one or the other. 
 
-If your view is contained within a `LinearLayout`, then you can use the [`android:layoutGravity`](http://developer.android.com/reference/android/widget/LinearLayout.LayoutParams.html#attr_android:layout_gravity) to determine the alignment of the view.
+If your view is contained within a `LinearLayout`, then you can use the [`android:layout_gravity`](http://developer.android.com/reference/android/widget/LinearLayout.LayoutParams.html#attr_android:layout_gravity) to determine the alignment of the view.
 
 To align the contents within a view, you can use the [[android:gravity|Defining-Views-and-their-Attributes#view-gravity]] property. This property can also be used to set the alignment of text in a `TextView` to the `left`, `right`, or `center`. Note that `android:textAlignment` is **essentially useless** replaced by gravity.
 
 #### How do I specify percentage based width, height and margins for my views?
 
-Simply wrap your views inside a [[PercentRelativeLayout|Constructing-View-Layouts#percentrelativelayout]] or `PercentFrameLayout` and specify attributes with "Percent" suffix. Alternatively, you can also use [[`android:layout_weight`|Constructing-View-Layouts#linearlayout]] attribute if you are using a `LinearLayout`.
+Simply wrap your views inside a [[PercentRelativeLayout|Constructing-View-Layouts#percentrelativelayout]] or `PercentFrameLayout` and specify attributes with "Percent" suffix. Alternatively, you can also use [[android:layout_weight|Constructing-View-Layouts#linearlayout]] attribute if you are using a `LinearLayout`.
 
 #### How do I add tabs to my activity to switch between views?
 
 Tabs used to swap the content displayed on screen can be added to an Activity using a number of methods. The [[recommended method using a TabLayout|Google-Play-Style-Tabs-using-TabLayout]] involves splitting up the contents of each tab into a "Fragment" (modular piece of an activity) and then using a "ViewPager" which enables us to easily swap the contents of different fragments onto the screen. 
 
+#### How do I control the order of view layers within a layout?
+
+The easiest way to layer is to pay close attention to the order in which the Views are added to your XML file within their container. Lower down in the file means higher up in the Z-axis. Be sure to check out this [[detailed section on view drawing order|Constructing-View-Layouts#understanding-view-layers]] for the details. 
+
+#### How do I overlap two views on top of each other?
+
+The easiest way to overlap two views on top of each other is to use a [[RelativeLayout|Constructing-View-Layouts#relativelayout]] or [[FrameLayout|Constructing-View-Layouts#framelayout]] to wrap the views and then to order them such that views that should be drawn on top are lower down in the file. Be sure to check out this [[detailed section on view drawing order|Constructing-View-Layouts#understanding-view-layers]] for the details.
+
+#### Why is my layout overlapping the status bar?
+
+Use `android:fitsSystemWindows="true"` in the root view of your layout. This is an internal attribute to adjust view layout based on system windows such as the status bar. If true, adjusts the padding of this view to leave space for the system windows. Read more about [caveats here](http://stackoverflow.com/a/29738556).
+
 ### Images
+
+#### What basics should I know about loading images?
+
+Be sure to review the following key tips about images:
+
+ * **Icons vs Images.** Don't use the "Image Asset" dialog in Android Studio unless **you want to generate small icons**.
+ * **Image Densities**. Instead use [Final Android Resizer](http://guides.codepath.com/android/Working-with-the-ImageView#final-android-resizer) to create appropriate image sizes.
+ * **Memory Errors.** Image files larger than `1776 x 1080px` in dimensions will cause Android apps to crash.
+ * **Resource Names.** Filenames only include **lowercase letters, numbers and underscores** (i.e `image_1.png`)
+ * **Scaling Images.** Understand and adjust the [scaleType](http://guides.codepath.com/android/Working-with-the-ImageView#scale-types) of your `ImageView` to control how the image is displayed.
+ * **Aspect Ratio.** Add `android:adjustViewBounds="true"` to your `ImageView` to adjust the size to image aspect ratio.
+
+Refer to the questions below for more detail.
 
 #### How do I load images into an Android app for display?
 
 If you simply want the image to be loaded in the easiest way possible then **just copy and paste** the image from your finder into the Android Studio `res/drawable` folder and select `xxhdpi` as the resolution. Keep in mind that images at `xxhdpi` density (1dp = 3px) should be about **3x the size desired on screen** to appear clear. For example, if you want an image to display as `32x32px` on screen, the image should be `96x96px` in the `drawable-xxhdpi` folder. See [[this page about densities|Working-with-the-ImageView#supporting-multiple-densities]] for more details. 
-
-In addition, be sure to be aware of the following gotchas:
-
- * Images should be resized as needed and should never be larger than `1776 x 1080px`.
- * Image filenames can only contain **lowercase letters, numbers and underscores** (i.e my_image_file_1.png)
- * Images must be copied and pasted into the drawable folder and cannot be dragged from the desktop.
- * Only use the icon generator (i.e `New Image Asset`) when you want a very small icon sized by the system.
 
 To generate images that work well at all densities, check out [[this image guide|Working-with-the-ImageView#supporting-multiple-densities]] which allows us to select our resources directory, choose an extra high density image and the tool will automatically generate the corresponding lower density image sizes.
 
@@ -137,7 +155,7 @@ Any view can have a click handler setup by [[following this event handler guide|
 
 For views that display text, if the view such as a button displays text in all caps and you want to disable that set the `android:textAllCaps="false"` property to change that behavior. This behavior is the default starting with API 21. 
 
-For **EditText** or other views that accept input, use the [android:capitalize](http://developer.android.com/reference/android/widget/TextView.html#attr_android:capitalize) attribute to change the capitalization of text entered by the user.
+For **EditText** or other views that accept input, use the [android:capitalize](http://developer.android.com/reference/android/widget/TextView.html#attr_android:capitalize) attribute (deprecated from API 3, using `android:inputType` instead) to change the capitalization of text entered by the user.
 
 #### How can I add an image on the left of the text in my button?
 
@@ -238,14 +256,14 @@ We can then apply that shape drawable to the background of any view or layout wi
 
 Refer to the [gradient drawable section](http://guides.codepath.com/android/Drawables#gradient-colored-shapes) for more details on drawing shapes and applying them to views. 
 
-#### How do I remove the grey border from a Button or ImageButton?
+#### How do I remove the grey border from an ImageButton?
 
-You can remove the border from a `Button` or `ImageButton` by either setting `android:background` to "@null" or setting `style` to "android:attr/borderlessButtonStyle":
+You can remove the border from a `ImageButton` by either setting `android:background` to "@android:color/transparent":
 
 ```xml
-<Button
-     ...
-     style="?android:attr/borderlessButtonStyle"
+<ImageButton
+     android:background="@android:color/transparent"
+     android:src="@drawable/fancy_button"
      ...
 />
 ```

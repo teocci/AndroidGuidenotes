@@ -83,7 +83,7 @@ BitmapDescriptor defaultMarker =
 // listingPosition is a LatLng point
 LatLng listingPosition = new LatLng(-33.867, 151.206);
 // Create the marker on the fragment 
-Marker mapMarker = mapFragment.addMarker(new MarkerOptions()
+Marker mapMarker = map.addMarker(new MarkerOptions()
     .position(listingPosition)					 								    
     .title("Some title here")
     .snippet("Some description here")
@@ -122,7 +122,86 @@ BitmapDescriptor customMarker =
   BitmapDescriptorFactory.fromResource(R.drawable.house_flag);
 ```
 
-See the [BitmapDescriptorFactory](https://developers.google.com/android/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory) docs for other colors or icon loading options. Review the [official markers guide](https://developers.google.com/maps/documentation/android/marker#make_a_marker_draggable) for additional marker customization options.
+See the [BitmapDescriptorFactory](https://developers.google.com/android/reference/com/google/android/gms/maps/model/BitmapDescriptorFactory) docs for other colors or icon loading options. 
+
+#### Speech Bubbles
+
+<img src="http://imgur.com/tj9gpoa.png"/>
+
+Add the [Google Maps Android Utility library](https://developers.google.com/maps/documentation/android-api/utility/) to your `app/build.gradle` file:
+
+```gradle
+dependencies {
+  compile 'com.google.maps.android:android-maps-utils:0.4+'
+}
+```
+
+Use the `IconGenerator` class included in this library and set the color and text of this speech bubble:
+
+```java
+IconGenerator iconGenerator = new IconGenerator(MapDemoActivity.this);
+
+// Possible color options:
+// STYLE_WHITE, STYLE_RED, STYLE_BLUE, STYLE_GREEN, STYLE_PURPLE, STYLE_ORANGE
+iconGenerator.setStyle(IconGenerator.STYLE_GREEN);
+// Swap text here to live inside speech bubble
+Bitmap bitmap = iconGenerator.makeIcon(title);
+// Use BitmapDescriptorFactory to create the marker
+BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+```
+
+When adding a marker, use this icon instead of the default one:
+
+```java
+Marker mapMarker = map.addMarker(new MarkerOptions()
+// add options here
+    .icon(icon));
+```
+
+### Enable Markers to be Draggable
+
+First, set the activity to implement `OnMarkerDragListener` and set the map to listen for drag events:
+
+```java
+public class MapDemoActivity extends AppCompatActivity 
+                                     implements GoogleMap.OnMarkerDragListener {
+
+  private GoogleMap map;
+
+  protected void loadMap(GoogleMap googleMap) {
+    map = googleMap;
+
+    if (map != null) {
+      map.setOnMarkerDragListener(this);
+    }
+  }
+```
+
+You then must implement the `onMarkerDragStart()`, `onMarkerDrag()`, and `onMarkerDragEnd()` methods for your activity:
+
+```java
+@Override
+public void onMarkerDragStart(Marker marker) {
+
+}
+
+@Override
+public void onMarkerDrag(Marker marker) {
+}
+
+@Override
+public void onMarkerDragEnd(Marker marker) {
+   // DO MOST WORK HERE
+}
+```
+
+Finally, when [[creating markers|Google-Maps-API-v2-Usage#adding-markers-to-map-fragment]], make sure to set the draggable state to `true`:
+
+```java
+marker.setDraggable(true);
+```
+
+To verify, create a marker and hold down the mouse button for a few seconds before moving it. If you also have a  long click listener may also interfere, make sure your cursor is pointing directly at a marker icon.
 
 ### Show AlertDialog on LongClick
 
@@ -134,45 +213,26 @@ First, we need to create a new xml file in `res/layout/message_item.xml` which w
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/layout_root"
+<RelativeLayout android:id="@+id/layout_root"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp" >
-
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:text="Title:" />
+    android:padding="10dp">
 
     <EditText
         android:id="@+id/etTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/etSnippet"
-        android:layout_alignBottom="@+id/tvTitle"
-        android:layout_toRightOf="@+id/tvTitle" >
-    </EditText>
-
-    <TextView
-        android:id="@+id/tvSnippet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tvTitle"
         android:paddingTop="20dp"
-        android:text="Snippet:" />
+        android:hint="Title"></EditText>
 
     <EditText
         android:id="@+id/etSnippet"
+        android:layout_below="@id/etTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/tvSnippet"
-        android:layout_below="@+id/tvTitle"
-        android:layout_toRightOf="@+id/tvSnippet" >
-    </EditText>
-
+        android:hint="Snippet"></EditText>
 </RelativeLayout>
 ```
 
@@ -185,7 +245,7 @@ public class MapDemoActivity extends AppCompatActivity implements
   GoogleApiClient.ConnectionCallbacks,
   GoogleApiClient.OnConnectionFailedListener,
   LocationListener,
-  OnMapLongClickListener {
+  GoogleMap.OnMapLongClickListener {
 
     ...
 
@@ -508,6 +568,152 @@ mapFragment.getMapAsync(new OnMapReadyCallback() {
 The various types are illustrated below:
 
 <img src="https://i.imgur.com/LWHlz7a.jpg" alt="map types" width="300" />
+
+### Using Vectors As Map Markers
+
+First install the `com.google.maps.android:android-maps-utils` library.
+
+In order to use an .xml file / vector for a map marker it must first be inflated into layout then converted into a bitmap.
+
+Turn the drawable.xml file into a bitmap:
+
+```java
+public Bitmap getMarker() {
+    IconGenerator iconGen = new IconGenerator(context);
+
+    // Define the size you want from dimensions file
+    int shapeSize = context.getResources().getDimensionPixelSize(R.dimen.custom_marker_size);
+
+    Drawable shapeDrawable = ResourcesCompat.getDrawable(context.getResources(), 
+        R.drawable.custom_marker, null);
+    iconGen.setBackground(shapeDrawable);
+
+    // Create a view container to set the size
+    View view = new View(context);
+    view.setLayoutParams(new ViewGroup.LayoutParams(shapeSize, shapeSize));
+    iconGen.setContentView(view);
+
+    // Create the bitmap
+    Bitmap bitmap = iconGen.makeIcon();
+
+    return bitmap;
+}
+```
+
+Consume the Bitmap in your Marker Creator:
+
+```java
+Marker mapMarker = map.addMarker(new MarkerOptions()
+    .position(listingPosition)                                                      
+    .icon(BitmapDescriptorFactory.fromBitmap(getMarker()));
+```
+### Marker Clustering
+Before diving in, you will need to have the [maps utility library](https://developers.google.com/maps/documentation/android-api/utility/) installed.  
+The clustering utility allows you to manage how markers render at different zoom levels. Instead of the map keeping track of markers, it will now track objects and then render them as clusters or markers depending on the zoom and the distance between marker points.
+
+This section shows how to implement clusters that will appear as individual markers when zoomed in. And it will show how to support click events on the markers.
+
+First create a class `MyItem` that implements `ClusterItem`: 
+
+```java
+public class MyItem implements ClusterItem {
+  private final LatLng mPosition;
+
+  public MyItem(double lat, double lng) {
+    mPosition = new LatLng(lat, lng);
+  }
+
+  @Override
+  public LatLng getPosition() {
+    return mPosition;
+  }
+}
+```
+In your map activity, add the `ClusterManager` and feed it the cluster items:
+
+```java
+public class MapActivity extends AppCompatActivity {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    ...
+    setUpClusterer()
+  }
+	
+  private void setUpClusterer() {
+    // Declare a variable for the cluster manager.
+    private ClusterManager<MyItem> mClusterManager;
+
+    private List<MyItem> myItems;
+
+    // Initialize the manager
+    mClusterManager = new ClusterManager<MyItem>(this, getMap());
+    
+    // Point the map's listeners at the listeners implemented by the cluster manager.
+    // This will later allow onClusterItemClick to work.
+    getMap().setOnMarkerClickListener(mClusterManager);
+
+    // Add cluster items (markers) to the cluster manager.
+    myItems = yourWayOfPopulating();
+    mClusterManager.addItems(myItems);
+    // Let the cluster manager know you've made changes
+    mClusterManager.cluster()
+  }
+	
+}
+```
+
+At this point, you should be able to render default markers that cluster. In order use customized markers you will need to extend `DefaultClusterRenderer` and build your own renderer class:
+
+```java
+private void setUpClusterer() {
+  ...
+  mClusterManager = new ClusterManager<MyItem>(this, getMap());
+  
+  // Set our custom renderer
+  mClusterManager.setRenderer(new MyItemRenderer());
+  ...
+}
+```
+Define the `MyItemRenderer` class:
+
+```java
+public class MyItemRenderer extends DefaultClusterRenderer<MyItem>{
+	
+  public MyItemRenderer(ClusterManager<MyItem> clusterManager) {
+    super(getApplicationContext(), getMap(), clusterManager);
+  }
+
+  @Override
+  protected void onBeforeClusterItemRendered(MyItem myItem, MarkerOptions markerOptions) {
+    // Customize the marker here
+    markerOptions
+	      .position(myItem.getLatLng())
+	      .icon(BitmapDescriptorFactory.fromBitmap(getMarker()));
+  }
+
+   @Override
+  protected void onBeforeClusterRendered(Cluster<MyItem> cluster, MarkerOptions markerOptions) {
+    // Customize the cluster here
+    markerOptions
+	      .icon(BitmapDescriptorFactory.fromBitmap(getMarker()))
+  }
+}
+```
+
+In order to support click events on the marker have your parent activity implement `OnClusterItemClickListener`:
+
+```java
+public class MapActivity extends AppCompatActivity implements ClusterManager.OnClusterItemClickListener<MyItem>{
+  ...
+  @Override
+  public boolean onClusterItemClick(MyItem item) {
+    // Do a click thing here
+    return false;
+  }
+}
+```
+
+For additional information check out the [google] (https://developers.google.com/maps/documentation/android-api/utility/marker-clustering) tutorial. This [google app](https://github.com/googlemaps/android-maps-utils) contains code samples for a customized map with cluster icons. This [post](http://stackoverflow.com/a/30972491/1715285) on stack overflow goes into deep detail on styling a cluster icon. 
 
 ### Utility Library
 

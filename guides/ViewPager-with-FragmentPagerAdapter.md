@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 	// ...
 	
     public static class MyPagerAdapter extends FragmentPagerAdapter {
-	private static int NUM_ITEMS = 3;
+	    private static int NUM_ITEMS = 3;
 		
         public MyPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -287,6 +287,39 @@ adapterViewPager.getRegisteredFragment(vpPager.getCurrentItem());
 ```
 
 This pattern should save your app quite a deal of memory and allow for much easier management of fragments within your pager for the right situation.
+
+### Replacing Fragments Inside ViewPager
+
+In certain cases, we want to dynamically replace the `Fragment` shown for a given page within a `ViewPager`. For example, perhaps the page in the `ViewPager` currently displays a list of items and we want to have a detail view show up when an item is selected. There are two approaches for this: create a fragment container as a page or switch fragments from within the adapter. 
+
+The first approach is to have the page **display a fragment container** that switches between multiple child content fragments as [outlined in this tutorial](http://www.pineappslab.com/post/fragments-viewpager/) on the subject. You can view the [working sample code here](https://github.com/danilao/fragments-viewpager-example) as well. 
+
+The second approach is to **switch the fragment that displays** inside the `FragmentPagerAdapter` by overriding the `getItem(...)` method as well as `getItemPosition(Object object)` which is invoked every time you call `viewPager.getAdapter().notifyDataSetChanged()`. For example:
+
+```java
+public static class MyPagerAdapter extends FragmentPagerAdapter {
+    // Return a different fragment for position based on additional state tracked in a member variable
+    @Override
+    public Fragment getItem(int position) {
+        // For a given position, return two different potential fragments based on a condition
+    }
+
+    // Force a refresh of the page when a different fragment is displayed
+    @Override
+    public int getItemPosition(Object object) {
+        // this method will be called for every fragment in the ViewPager
+        if (object instanceof SomePermanantCachedFragment) {
+            return POSITION_UNCHANGED; // don't force a reload
+        } else {
+            // POSITION_NONE means something like: this fragment is no longer valid
+            // triggering the ViewPager to re-build the instance of this fragment.
+            return POSITION_NONE;
+        }
+    }
+}
+```
+
+You would then invoke `notifyDataSetChanged` on the pager adapter to trigger a reload of the pager at any time. For more details, check out [this StackOverflow thread](http://stackoverflow.com/q/33342613/313399) as well as [this post](http://stackoverflow.com/a/18088509/313399).
 
 ## Set Offscreen Page Limit
 

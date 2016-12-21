@@ -14,9 +14,29 @@ It was first used by the Play Store team in Play Store Application and then they
 
 ## Setup Volley
 
-Adding Volley to our app/build.gradle file:
+Adding Volley to our `app/build.gradle` file:
 
-`compile 'com.android.volley:volley:1.0.0'`
+```gradle
+dependencies {
+    compile 'com.android.volley:volley:1.0.0'
+}
+```
+
+And add the internet permission in `AndroidManifest.xml`:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.simplenetworking"
+    android:versionCode="1"
+    android:versionName="1.0" >
+ 
+   <!-- Add permissions here -->
+   <uses-permission android:name="android.permission.INTERNET" /> 
+   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+</manifest>
+```
 
 ## How to use Volley?
 
@@ -27,10 +47,10 @@ Volley has two classes that you will have to deal with:
 
 A Request object comes in three major types:
 
-* [JsonObjectRequest](http://files.evancharlton.com/volley-docs/com/android/volley/toolbox/JsonObjectRequest.html) — To send and receive JSON Object from the server
-* [JsonArrayRequest](http://files.evancharlton.com/volley-docs/com/android/volley/toolbox/JsonArrayRequest.html) — To receive JSON Array from the server
-* [ImageRequest](http://files.evancharlton.com/volley-docs/com/android/volley/toolbox/ImageRequest.html) - To receive an image from the server
-* [StringRequest](http://files.evancharlton.com/volley-docs/com/android/volley/toolbox/StringRequest.html) — To retrieve response body as String (ideally if you intend to parse the response by yourself)
+* [JsonObjectRequest](http://afzaln.com/volley/com/android/volley/toolbox/JsonObjectRequest.html) — To send and receive JSON Object from the server
+* [JsonArrayRequest](http://afzaln.com/volley/com/android/volley/toolbox/JsonArrayRequest.html) — To receive JSON Array from the server
+* [ImageRequest](http://afzaln.com/volley/com/android/volley/toolbox/ImageRequest.html) - To receive an image from the server
+* [StringRequest](http://afzaln.com/volley/com/android/volley/toolbox/StringRequest.html) — To retrieve response body as String (ideally if you intend to parse the response by yourself)
 
 ### Constructing a RequestQueue
 
@@ -49,6 +69,10 @@ public MainActivity extends Activity {
 }
 ```
 
+### Creating a Singleton Queue
+
+See [this guide for creating a singleton to use for sending requests](https://developer.android.com/training/volley/requestqueue.html). 
+
 ### Accessing JSON Data
 
 After this step you are ready to create your `Request` objects which represents a desired request to be executed. Then we add that request onto the queue. 
@@ -61,22 +85,22 @@ public class MainActivity extends Activity {
 
 	private void fetchJsonResponse() {
 		// Pass second argument as "null" for GET requests
-		JsonObjectRequest req = new JsonObjectRequest("http://ip.jsontest.com/", null,
+		JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, "http://ip.jsontest.com/", null,
 		    new Response.Listener<JSONObject>() {
 		        @Override
 		        public void onResponse(JSONObject response) {
 		            try {
-				String result = "Your IP Address is " + response.getString("ip");
-				Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
-			    } catch (JSONException e) {
-			        e.printStackTrace();
-			    }
-	                }
+		                String result = "Your IP Address is " + response.getString("ip");
+		                Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+		            } catch (JSONException e) {
+		                e.printStackTrace();
+		            }
+		        }
 		    }, new Response.ErrorListener() {
-			@Override
-			public void onErrorResponse(VolleyError error) {
-				VolleyLog.e("Error: ", error.getMessage());
-			}
+		        @Override
+		        public void onErrorResponse(VolleyError error) {
+		            VolleyLog.e("Error: ", error.getMessage());
+		        }
 		});
 
 		/* Add your Requests to the RequestQueue to execute */
@@ -87,8 +111,36 @@ public class MainActivity extends Activity {
 
 And that will execute the request to the server and respond back with the result as specified in the `Response.Listener` callback. For a more detailed look at Volley, check out [this volley tutorial](http://arnab.ch/blog/2013/08/asynchronous-http-requests-in-android-using-volley/).
 
+### Canceling Requests
+
+You can tag a request with:
+
+```java
+StringRequest stringRequest = ...;
+RequestQueue mRequestQueue = ...;
+
+// Set the tag on the request.
+stringRequest.setTag(TAG);
+
+// Add the request to the RequestQueue.
+mRequestQueue.add(stringRequest);
+```
+
+You can now cancel all requests with this tag using the `cancelAll` on the request queue:
+
+```java
+@Override
+protected void onStop() {
+    super.onStop();
+    if (mRequestQueue != null) {
+        mRequestQueue.cancelAll(TAG);
+    }
+}
+```
+
 ## References
 
+* <https://developer.android.com/training/volley/index.html>
 * <https://smaspe.github.io/2013/06/03/volley-part1.html>
 * <http://java.dzone.com/articles/android-%E2%80%93-volley-library>
 * <http://arnab.ch/blog/2013/08/asynchronous-http-requests-in-android-using-volley/>

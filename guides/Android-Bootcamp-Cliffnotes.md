@@ -46,6 +46,7 @@ Cliffnotes are references giving you the "most important" Android topics with br
 * [[ActiveAndroid Tips and Q&A|ActiveAndroid Guide]]
 * [[Rotten Tomatoes Networking Tutorial]]
 * [[Building Data driven Apps with Parse]]
+* [[Storing Secret Keys in Android]]
 * [[Local Databases with SQLiteOpenHelper]]
 * [[Populating a ListView with a CursorAdapter]]
 
@@ -92,6 +93,7 @@ Cliffnotes are references giving you the "most important" Android topics with br
 * [[Handling Scrolls with CoordinatorLayout]]
 * [[Shared Element Activity Transition]]
 * [[Floating Action Buttons]]
+* [[View Hierarchy Animations]]
 
 ### Week 8 - Next Steps
 

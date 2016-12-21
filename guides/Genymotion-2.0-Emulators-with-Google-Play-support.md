@@ -2,12 +2,13 @@
 
 [Genymotion](http://www.genymotion.com/) is an incredibly fast, memory-efficient VM that runs the Android OS in a more accurate manner than even the official emulator. Many Android developers do all their device testing using this emulator especially when Google Play services is concerned.  In addition, the official Android emulator is plagued with a lot of bugs (i.e. intermittent network loss) that Genymotion is usually a far more reliable option.
 
-To setup your genymotion emulator [sign up](https://www.genymotion.com/account/login/) and follow the [installation guide](https://docs.genymotion.com/Content/Home.htm):
+To setup your genymotion emulator [sign up](https://www.genymotion.com/account/login/) and follow the [installation guide](https://docs.genymotion.com/Content/Home.htm).  
 
 #### Installation
 
 1. Sign up for an account on the [Genymotion Website](https://www.genymotion.com/account/login/)
-2. Install [VirtualBox 5.0](https://www.virtualbox.org/wiki/Downloads), a powerful free virtualization software for Genymotion to run.  
+2. Install [the latest VirtualBox](https://www.virtualbox.org/wiki/Downloads), a powerful free virtualization software for Genymotion to run.  
+   * If you already have VirtualBox installed, be sure to open and upgrade to the latest version.
 3. [Download Genymotion Emulator v2.7.0 or higher](https://www.genymotion.com/download/) for your platform.  
 4. Install the Genymotion Emulator
   * Windows: Run the MSI installer
@@ -18,11 +19,11 @@ To setup your genymotion emulator [sign up](https://www.genymotion.com/account/l
    <img src="http://cdn.sysprobs.com/wp-content/uploads/2009/10/virt_bios.gif"> 
 7. Install the Genymotion plugin for Android Studio.  Go to `Preferences`->`Plugins` and click Browse repositories. Search for Genymotion and you should find one provided by http://www.genymotion.com.
 
-  ![https://i.imgur.com/AIY7gOS.gif](https://i.imgur.com/AIY7gOS.gif | width=100%)
+  ![https://i.imgur.com/AIY7gOS.gif](https://i.imgur.com/AIY7gOS.gif)
 
-  After restarting, go to `Preferences`->`Genymotion` and setup the location of the Genymotion app.
+  After restarting, go to `Preferences`->`Other`->`Genymotion` and setup the location of the Genymotion app.
 
-  ![https://i.imgur.com/0bdrECm.png](https://i.imgur.com/0bdrECm.png)
+  ![http://i.imgur.com/JIZb7FE.png](http://i.imgur.com/JIZb7FE.png)
 
 #### Configuration
 
@@ -34,6 +35,22 @@ To setup your genymotion emulator [sign up](https://www.genymotion.com/account/l
   * You can start the emulator through the Android Studio plugin, or can launch the Genymotion application separately.
 4. Wait for device to boot up into a useable state
 
+**Note**: if starting Genymotion you see the following error:
+
+```
+Unable to start the virtual device
+VirtualBox cannot start the virtual device
+To find out the cause the problem, start the virtual device from VirtualBox.
+```
+
+Try opening VirtualBox and opening the image directly.  If you see an `VERR_PDM_DRIVER_NOT_FOUND` error, try disabling the audio settings for the virtual image in VirtualBox:
+
+1. Select Android VM
+2. Click Settings on top.
+3. Go to Audio and Uncheck Enable Audio Checkbox
+
+See [this link](http://stackoverflow.com/questions/38275500/genymotion-virtualbox-error) for more information.
+
 **Note:** On Ubuntu/Linux, make sure to [3D acceleration mode](http://imgur.com/Kl9cOmb) by launching VirtualBox and going to `Settings -> Display` to fix. VirtualBox appears to prone to memory leaks, so you may find yourself killing the process from time to time. To avoid large CPU consumption by the compiz window manager and swapping in general, try increasing the video memory allocation and Base Memory (found in `Settings -> System`).
 
 **Note:** Are you getting an error when starting the emulator? `Error Failed to load VMMR0.r0`? Follow the [advice here](https://forums.virtualbox.org/viewtopic.php?f=8&t=40525#p186381). In short, go to [virtual box page](https://www.virtualbox.org/wiki/Downloads) and download and install VirtualBox 4.3.6 Oracle VM VirtualBox Extension Pack.
@@ -44,7 +61,10 @@ To setup your genymotion emulator [sign up](https://www.genymotion.com/account/l
 
 **NOTE**: These steps need to be followed only if you want to be able to use Google services such as maps and push messaging on your Genymotion device. For basic testing, these steps can be safely skipped.
 
+Check out [this handy youtube video](https://www.youtube.com/watch?v=UFhStnF42tw) for a guided step-by-step of enabling play services in Genymotion. You may want to use a newer version of these files based on the desired emulator as found below. 
+
 1. Download the [ARM Translation Installer v1.1](http://www14.zippyshare.com/v/44278764/file.html) and drag and drop the zip file onto the running Genymotion emulator device.  The ARM emulator is only needed for apps that trigger a `INSTALL_FAILED_CPU_ABI_INCOMPATIBLE` error.
+  * **Note:** If you get `Files successfully copied` message, you need to make sure there **are no spaces in the filename**. Remove any spaces from the name of your zip file before dragging to ensure the file is detected as flashable.
 
 2. You must **close and restart the emulator** fully before continuing.
 
@@ -52,6 +72,7 @@ To setup your genymotion emulator [sign up](https://www.genymotion.com/account/l
 
 | Version     | APK Link                                                                          |
 |-------------|:---------------------------------------------------------------------------------:| 406
+|Android 7.0  | [Download from GApps](http://opengapps.org/) (Untested)                           |
 |Android 6.0  |1) [gapps-L-4-21-15.zip](https://www.androidfilehost.com/?fid=96042739161891406) 2) [benzo-gapps-M-20151011-signed-chroma-r3.zip](https://www.androidfilehost.com/?fid=24052804347835438) (See instructions below)|
 |Android 5.0  |[Google Play Services APK](https://www.androidfilehost.com/?fid=95784891001614559) - requires Genymotion 2.4.0+ |
 |Android 4.4.4|[Google Play Services APK](https://www.androidfilehost.com/?fid=23501681358544845)             |
@@ -64,6 +85,7 @@ To setup your genymotion emulator [sign up](https://www.genymotion.com/account/l
 
 5. When asked to flash the device, make sure to proceed with the installation.
    - At this point, 'Google Apps Services' will crash frequently with the message "google play services has stopped working".
+   - **Note:** If you get `Files successfully copied` message, you need to make sure there **are no spaces in the filename**. Remove any spaces from the name of your zip file before dragging to ensure the file is detected as flashable.
 
 6. You must **close and restart the emulator** so that Google Play Store can be installed.
 
@@ -118,5 +140,15 @@ Keep running `./adb devices` until you see a device show up in that list:
 List of devices attached
 192.168.57.101:5555	device
 ```
+
+### Connecting to VPN sites
+
+If you are trying to use a VPN client to connect to an internal web site, open VirtualBox and select the emulator image.  Click on Settings and make sure `Adapter 1` is disabled.   
+
+<img src="http://i.imgur.com/9tFR6We.png"/>
+
+Verify that `Adapter 2` is selected for NAT, which will force connections to be routed through your machine.
+
+<img src="http://i.imgur.com/ZFQMnaE.png"/>
 
 That's it! Try running the app again.

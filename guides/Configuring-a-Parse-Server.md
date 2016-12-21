@@ -46,7 +46,7 @@ Use Heroku if you have little or no experience with setting up web sites. Heroku
       * If you intend to use Parse's Facebook authentication, set `FACEBOOK_APP_ID` to be the [FB application ID](https://developers.facebook.com/apps).
       * If you intend to setup push notifications, there are additional environment variables such as `GCM_SENDER_KEY` and `GCM_API_KEY` that will need to be configured.  See [[this section|Configuring-a-Parse-Server#enabling-push-notifications]] for the required steps.
 
-4. Deploy the Heroku app.  The app should be hosted at `https://<app name>.herokuapp.com`.
+4. Deploy the Heroku app.  The app should be hosted at `https://<app name>.herokuapp.com` where `<app name>` represents your App Name that you provided (or if one was assigned to you if you left this field blank).
 
 If you ever need to change these values later, you can go to (`https://dashboard.heroku.com/apps/<app name>/settings`). Check out [this guide](https://devcenter.heroku.com/articles/deploying-a-parse-server-to-heroku) for a more detailed set of steps for deploying Parse to Heroku.
 
@@ -54,12 +54,12 @@ Now, we can [[test our deployment|Configuring-a-Parse-Server#testing-deployment]
 
 ### Testing Deployment
 
-After deployment, try to connect to the site.  You should see `I dream of being a web site.` if the site loaded correctly.   If you try to connect to the `/parse` endpoint, you should see `{error: "unauthorized"}`.  If both tests pass, the basic configuration is successful.
+After deployment, try to connect to the site.  You should see `I dream of being a website. Please star the parse-server repo on GitHub!` if the site loaded correctly.   If you try to connect to the `/parse` endpoint, you should see `{error: "unauthorized"}`.  If both tests pass, the basic configuration is successful.
 
 Next, make sure you can create Parse objects.  You do not need a client Key to write new data:
 
 ```bash
-curl -X POST -H "X-Parse-Application-Id: myAppId" -H "X-Parse-Master-Key: abc" \
+curl -X POST -H "X-Parse-Application-Id: myAppId" \
 -H "Content-Type: application/json" \
 -d '{"score":1337,"playerName":"Sean Plott","cheatMode":false}' \
 https://yourappname.herokuapp.com/parse/classes/GameScore
@@ -125,7 +125,7 @@ Make sure you have the latest Parse-Android SDK in your `app/build.gradle` file.
 
 ```gradle
 dependencies {
-    compile 'com.parse:parse-android:1.13.0'
+    compile 'com.parse:parse-android:1.13.1'
     compile 'com.parse:parseinterceptors:0.0.2' // for logging API calls to LogCat
     compile 'com.parse.bolts:bolts-android:1.+'
 }
@@ -147,7 +147,7 @@ If you are migrating from a previous Parse configuration, make sure to delete th
 Modify your `Parse.initialize()` command to point to this newly created server.  You must be on the latest Parse Android SDK to have these options.
 
 ```java
-public class ChatApplication extends Application {
+public class ParseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
@@ -157,7 +157,7 @@ public class ChatApplication extends Application {
         // any network interceptors must be added with the Configuration Builder given this syntax
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId("myAppId") // should correspond to APP_ID env variable
-                .clientKey(null)  // set explicitly unless clientKey is explicitly configured on Parse server
+                .clientKey("")  // set explicitly blank unless clientKey is configured on Parse server
                 .addNetworkInterceptor(new ParseLogInterceptor())
                 .server("https://parse-testing-port.herokuapp.com/parse/").build());
     }
@@ -193,6 +193,8 @@ The `/parse/` path needs to match the `PARSE_MOUNT` environment variable, which 
    ```
 
 * If you are seeing `Master key is invalid, you should only use master key to send push`, chances are you are trying to send Push notifications without enable client push.  On Parse.com you can simply enable a toggle switch but for hosted parse there is an outstanding [issue](https://github.com/ParsePlatform/parse-server/issues/396) that must be resolved to start supporting it.
+
+* If you see the exception `Error Loading Messagescom.parse.ParseException: java.lang.IllegalArgumentException: value == null`, try setting the `clientKey` to a blank string such as `Parse.initialize(...).applicationId(...).clientKey("")` rather than `null`. Review [this issue](https://github.com/ParsePlatform/Parse-SDK-Android/issues/392) and [this issue](https://github.com/ParsePlatform/Parse-SDK-Android/issues/201) for further details.
 
 * You can also use Facebook's [Stetho](http://facebook.github.io/stetho/) interceptor to watch network logs with Chrome:
 
@@ -231,185 +233,7 @@ The `/parse/` path needs to match the `PARSE_MOUNT` environment variable, which 
 
 ### Enabling Push Notifications
 
-**Note**: Support for push notifications is now available with the open source Parse server.   However, unlike Parse's own service, **you cannot implement this type of code** on the actual client:
-
-```java
-// Note: This does NOT work with Parse Server at this time
-ParsePush push = new ParsePush();
-push.setChannel("mychannel");
-push.setMessage("this is my message");
-push.sendInBackground();
-```
-
-You will likely see this error in the API response:
-
-```json
-{
-    "code": 115,
-    "error": "Master key is invalid, you should only use master key to send push"
-}
-```
-
-Instead, you need to write your own server-side Parse code and have the client invoke it.  Fortunately, the process is fairly straightforward:
-
-1. Fork this [repo](https://github.com/codepath/parse-server-example).  This repo is similar to the package that you used for your one-click deploy.  This repo has some additional environment variables configurations added that help facilitate sending push notifications (i.e. see `GCM_SENDER_ID`, and `GCM_API_KEY` in [index.js](https://github.com/codepath/parse-server-example/blob/master/index.js#L37-L40))
-2. Make sure to confirm the `SERVER_URL` environment variable is set to the URL and Parse mount location (i.e. `http://yourappname.herokuapp.com/parse`).
-3. Verify that `cloud/main.js` is the default value of `CLOUD_CODE_MAIN` environment variable.  
-4. Modify [cloud/main.js](https://github.com/codepath/parse-server-example/blob/master/cloud/main.js) yourself to add custom code to send Push notifications.  See [these examples](https://github.com/ParsePlatform/parse-server/issues/401#issuecomment-183767065) for other ways of sending too.  
-      * If you use Parse's default [ParsePushBroadcastReceiver](https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/Parse/src/main/java/com/parse/ParsePushBroadcastReceiver.java#L155-L160), using either `alert` or `title` as a key/value pair will trigger a notification message. See [this section](https://parse.com/docs/android/guide#push-notifications-receiving-pushes) of the Parse documentation.
-      * You can also create your own custom receiver as shown in [this example](https://github.com/codepath/ParsePushNotificationExample/blob/master/app/src/main/java/com/test/MyCustomReceiver.java).
-5. Redeploy the code.  If you are using Heroku, you need to connect your own forked repository and redeploy.  
-
-     <img src="http://i.imgur.com/OmxXc6s.png"/>
-
-6. Enable Google Cloud Messaging for your Android client (see [[instructions|Configuring-a-Parse-Server#gcm-setup]] below).
-
-7. Assuming the function is named `pushChannelTest`, modify your Android code to invoke this function by using the `callFunctionInBackground()` call.  Any parameters should be passed as a `HashMap`:
-
-     ```java
-
-     HashMap<String, String> test = new HashMap<>();
-     test.put("channel", "testing");
-
-     ParseCloud.callFunctionInBackground("pushChannelTest", test);
-     ```
-8. Make sure to register the GCM token to the server:
-
-     ```java
-     Parse.initialize(...);
-
-     // Need to register GCM token
-     ParseInstallation.getCurrentInstallation().saveInBackground();
-     ```
-
-#### Troubleshooting Push Notifications
-
-* If you are using Facebook's Stetho library with your Android client, you can see the LogCat statements and verify that GCM tokens are being registered by API calls to the `/parse/classes/_Installation` endpoint:
-
-```
-: Url : http://192.168.3.116:1337/parse/classes/_Installation
-```
-
-You should be able to se the `deviceToken`, `installationId`, and `appName` registered:
-
-```
-03-02 03:17:27.859 9362-9596/com.test I/ParseLogInterceptor:
-Body : {
-   "pushType": "gcm",
-   "localeIdentifier": "en-US",
-   "deviceToken": XXX,
-   "appVersion": "1.0",
-   "deviceType": "android",
-   "appIdentifier": "com.test",
-   "installationId": "XXXX",
-   "parseVersion": "1.13.0",
-   "appName": "PushNotificationDemo",
-   "timeZone": "America\/New_York"
-}
-```
-
-* Make sure you are on latest open source Parse version: [![npm version](https://img.shields.io/npm/v/parse-server.svg?style=flat)](https://www.npmjs.com/package/parse-server)  You will want to verify what version is set in your `package.json` file (i.e. https://github.com/ParsePlatform/parse-server-example/blob/master/package.json#L15).  Make sure to update this file and redeploy.
-
-* If GCM is fully setup, your app if properly configured should register itself with your Parse server.  Check your `_Installation` table to verify that the entries were being saved. Clear your app cache or uninstall the app if an entry in the  `_Installation` table hasn't been added.
-
-* Inside your `AndroidManifest.xml` definition, make sure your `gcm_sender_id` is prefixed with `id:` (i.e. `id:123456`).  Parse needs to begin with an `id:` to work correctly.
-
-* You can use this curl command with your application key and master key to send a push to all Android devices:
-
-```bash
- curl -X POST -H "X-Parse-Application-Id: myAppId" -H "X-Parse-Master-Key: myMasterKey" \
--H "Content-Type: application/json" \
--d '{"where": {"deviceType": "android"}, "data": {"action": "com.example.UPDATE_STATUS", "newsItem": "Man bites dog", "name": "Vaughn", "alert": "Ricky Vaughn was injured during the game last night!"}}' \
-https://parse-testing-port.herokuapp.com/parse/push/
-```
-
-* Use `heroku logs --app <app_name>` to see what is happening on the server side:
-
-```bash
-2016-03-03T09:26:50.032609+00:00 app[web.1]: #### PUSH OK
-```
-
-If you see `Can not find sender for push type android`, it means you forgot to set the environment variables `GCM_SENDER_ID` and `GCM_API_KEY`.
-
-* Make sure you have **not** included `com.google.android.gms:play-services-gcm:8.4.0` in your Gradle configuration.  Parse's Android SDK library already includes code to deal with the GCM registration.
-
-* Verify that you have all the permissions for GCM setup in your `AndroidManifest.xml` file and that you have the correct receivers configured.
-
-#### GCM Setup
-
-**Note**: The Parse Android SDK currently does not support Firebase Cloud Messaging, which is the new name for Google Cloud Messaging (see [discussion issue](https://github.com/ParsePlatform/Parse-SDK-Android/pull/452)).  You should follow the steps below to ensure that the older version of GCM is used.  In particular, the permissions in the manifest file that you need to set are checked by the Parse Android SDK, so you should keep the old permissions as shown below.
-
-1. Make sure you have Google Play installed on the emulator or device, since push notifications via [Google Cloud Messaging](Google-Cloud-Messaging) (GCM) will only work for devices and emulators that have Google Play installed.  
-
-2. Obtain a Sender ID and API Key.
-      * Follow only step 1 of [this guide](https://github.com/codepath/android_guides/wiki/Google-Cloud-Messaging/b7ab0d3329898f147b2fe7a32c731f9ce251893c#step-1-register-with-google-developers-console) to obtain the Sender ID (equivalent to the Project Number) and API Key.  You do not need to follow the other steps because Parse provides much of code to handle GCM registration for you.
-
-3. Set `GCM_SENDER_KEY` and `GCM_API_KEY` environment variables to correspond to the Sender ID and API Key in the previous step.  **Note**: this step only works if you have setup your Parse server to enable push support.  See the [CodePath fork](https://github.com/codepath/parse-server-example/blob/master/index.js#L15-L26) as an example about how to initialize the Parse server.
-
-      <img src="http://imgur.com/KgU2S2y.png"/>
-
-4. Add a `meta-data` with the Sender ID in your AndroidManifest.xml.  Make sure the `id:` is used as the prefix (Android treats any metadata value that has a string of digits as an integer so Parse prefixes this value).  If you forget this step, Parse will register with its own Sender ID but you will see `SenderID mismatch` errors when trying to issue push notifications.
-
-     ```xml
-        <meta-data
-              android:name="com.parse.push.gcm_sender_id"
-              android:value="id:SENDER_ID_HERE"/>
-     ```
-
-5. Add the necessary permissions:
-    * android.permission.INTERNET
-    * android.permission.ACCESS_NETWORK_STATE
-    * android.permission.WAKE_LOCK
-    * android.permission.GET_ACCOUNTS
-    * android.permission.VIBRATE (optional)
-    * com.google.android.c2dm.permission.RECEIVE
-    * context.getPackageName() + .permission.C2D_MESSAGE (i.e. `com.yourpackagename.permission.C2D_MESSAGE`)
-
-    ```xml
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-        <uses-permission android:name="android.permission.WAKE_LOCK" />
-        <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-        <uses-permission android:name="android.permission.VIBRATE" />
-        <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-        <!--
-          IMPORTANT: Change "com.codepath.parseportpush.permission.C2D_MESSAGE" in the lines below
-          to match your app's package name + ".permission.C2D_MESSAGE".
-        -->
-        <permission android:protectionLevel="signature"
-            android:name="com.codepath.parseportpush.permission.C2D_MESSAGE" />
-        <uses-permission android:name="com.codepath.parseportpush.permission.C2D_MESSAGE" />
-    ```
-
-6. Declare a service, Parse-specific broadcast receiver, and a GCM receiver within the `application` tag of the `AndroidManifest.xml` file:
-      * Add a `PushService` service.
-      * The Parse receiver should can handle `ACTION_PUSH_RECEIVE`, `ACTION_PUSH_OPEN`, and `ACTION_PUSH_DELETE` events.
-      * The GCM broadcast receiver should handle `com.google.android.c2dm.intent.RECEIVE` and `com.google.android.c2dm.intent.REGISTRATION` events.   It also should include a `category` tag that directs GCM registration responses only for your application package name.
-      ```xml
-      <application>
-          <service android:name="com.parse.PushService" />
-          <receiver android:name="com.parse.ParsePushBroadcastReceiver"
-                    android:exported="false">
-                <intent-filter>
-                      <action android:name="com.parse.push.intent.RECEIVE" />
-                      <action android:name="com.parse.push.intent.DELETE" />
-                      <action android:name="com.parse.push.intent.OPEN" />
-                </intent-filter>
-           </receiver>
-            <receiver android:name="com.parse.GcmBroadcastReceiver"
-                  android:permission="com.google.android.c2dm.permission.SEND">
-                  <intent-filter>
-                      <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                      <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                      <!--
-                        IMPORTANT: Change "com.codepath.parseportpush" to match your app's package name.
-                      -->
-                      <category android:name="com.codepath.parseportpush" />
-                  </intent-filter>
-            </receiver>
-      </application>
-      ```
+See [[this guide|Push-Notifications-Setup-for-Parse]] for more details about how to setup both the Parse open source version and the Parse Android SDK Client.
 
 ### Storing Files with Parse
 
